@@ -343,9 +343,9 @@ namespace RestaurantReservation.Migrations
                     RestaurantID = table.Column<int>(type: "int", nullable: false),
                     UserID = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Username = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ReservationDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    StartTime = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    EndTime = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ReservationDate = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    StartTime = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    EndTime = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     PartySize = table.Column<int>(type: "int", nullable: false),
                     SpecialRequests = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
@@ -371,8 +371,8 @@ namespace RestaurantReservation.Migrations
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
                 values: new object[,]
                 {
-                    { "4040c34c-e2be-4220-beb6-5a830a52e387", null, "Admin", "ADMIN" },
-                    { "f27da393-aa25-4717-9a4d-a95ef4c173ff", null, "User", "USER" }
+                    { "2293338c-02cb-47f4-bc8e-52218889caeb", null, "Admin", "ADMIN" },
+                    { "5d463b54-2440-4fd6-9565-a8cd5db69d51", null, "User", "USER" }
                 });
 
             migrationBuilder.CreateIndex(
