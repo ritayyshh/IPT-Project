@@ -32,6 +32,27 @@ const AdminHomePage = ({ handleLogout }) => {
     navigate('/add-restaurant');
   };
 
+  const handleViewRestaurant = (id) => {
+    navigate(`/adminrestaurants/${id}`);
+  };
+
+  const handleDeleteRestaurant = async (id) => {
+    try {
+      const response = await fetch(`http://localhost:5236/api/Restaurants/${id}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) {
+        throw new Error('Failed to delete restaurant');
+      }
+      // Update the state to remove the deleted restaurant
+      setRestaurants((prevRestaurants) =>
+        prevRestaurants.filter((restaurant) => restaurant.restaurantID !== id)
+      );
+    } catch (err) {
+      alert(`Error deleting restaurant: ${err.message}`);
+    }
+  };
+
   // Styles for the components
   const styles = {
     restaurantCard: {
@@ -66,8 +87,15 @@ const AdminHomePage = ({ handleLogout }) => {
       cursor: 'pointer',
       fontWeight: 'bold',
     },
-    viewButtonHover: {
-      backgroundColor: '#2980b9',
+    deleteButton: {
+      backgroundColor: '#e74c3c',
+      color: '#fff',
+      border: 'none',
+      padding: '10px 15px',
+      borderRadius: '5px',
+      marginTop: '10px',
+      cursor: 'pointer',
+      fontWeight: 'bold',
     },
     container: {
       display: 'flex',
@@ -82,10 +110,7 @@ const AdminHomePage = ({ handleLogout }) => {
     error: {
       color: '#e74c3c',
       fontSize: '16px',
-    }
-  };
-  const handleViewRestaurant = (id) => {
-    navigate(`/adminrestaurants/${id}`);
+    },
   };
 
   return (
@@ -130,23 +155,32 @@ const AdminHomePage = ({ handleLogout }) => {
         {!isLoading && !error && restaurants.length === 0 && (
           <p>No restaurants found.</p>
         )}
-        {!isLoading && !error && restaurants.length > 0 && restaurants.map((restaurant) => (
-          <div key={restaurant.restaurantID} style={styles.restaurantCard}>
-            <div style={styles.restaurantName}>{restaurant.name}</div>
-            <div style={styles.restaurantLocation}>
-              Location: {restaurant.location}
+        {!isLoading &&
+          !error &&
+          restaurants.length > 0 &&
+          restaurants.map((restaurant) => (
+            <div key={restaurant.restaurantID} style={styles.restaurantCard}>
+              <div style={styles.restaurantName}>{restaurant.name}</div>
+              <div style={styles.restaurantLocation}>
+                Location: {restaurant.location}
+              </div>
+              <div style={styles.rating}>
+                Average Rating: {restaurant.averageRating || 'N/A'}
+              </div>
+              <button
+                style={styles.viewButton}
+                onClick={() => handleViewRestaurant(restaurant.restaurantID)}
+              >
+                View Restaurant
+              </button>
+              <button
+                style={styles.deleteButton}
+                onClick={() => handleDeleteRestaurant(restaurant.restaurantID)}
+              >
+                Delete
+              </button>
             </div>
-            <div style={styles.rating}>
-              Average Rating: {restaurant.averageRating || 'N/A'}
-            </div>
-            <button
-              style={styles.viewButton}
-              onClick={() => handleViewRestaurant(restaurant.restaurantID)}
-            >
-              View Restaurant
-            </button>
-          </div>
-        ))}
+          ))}
       </div>
     </div>
   );

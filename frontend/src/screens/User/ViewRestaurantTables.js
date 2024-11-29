@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useParams, useLocation } from "react-router-dom";
 
 const ViewRestaurantTables = () => {
+  const today = new Date().toISOString().split("T")[0];
   const { restaurantID } = useParams();
   const [tables, setTables] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -16,10 +17,10 @@ const ViewRestaurantTables = () => {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const location = useLocation();
-  const username = location.state?.username || "";
-  const userId = location.state?.userId || "";
+  const [userId, setUserId] = useState(null);
+  const [username, setUsername] = useState(null);
 
-  const fetchTables = async () => {
+  const fetchTables = useCallback(async () => {
     try {
       const response = await fetch(
         `http://localhost:5236/api/Tables/Restaurant/${restaurantID}`
@@ -35,11 +36,17 @@ const ViewRestaurantTables = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [restaurantID]);
 
   useEffect(() => {
+    const urlParams = new URLSearchParams(location.search);
+    const userIdFromUrl = urlParams.get("userId");
+    const usernameFromUrl = urlParams.get("username");
+    if (userIdFromUrl) setUserId(userIdFromUrl);
+    if (usernameFromUrl) setUsername(usernameFromUrl);
+
     fetchTables();
-  }, [restaurantID]);
+  }, [location.search, fetchTables]);
 
   const handleReserve = (table) => {
     setSelectedTable(table);
@@ -51,58 +58,86 @@ const ViewRestaurantTables = () => {
       return;
     }
 
-    const { tableID } = selectedTable;
+    const { tableID, seatingCapacity } = selectedTable;
 
     // Validate reservation details
     const { reservationDate, startTime, endTime, partySize } = reservationDetails;
 
-    // Ensure start time is before end time
     if (startTime >= endTime) {
-      setError("Start time must be earlier than end time.");
+      alert("Start time must be earlier than end time.");
       return;
     }
 
-    // Ensure party size does not exceed table's seating capacity
-    if (partySize > selectedTable.seatingCapacity) {
-      setError(`Party size cannot exceed seating capacity of ${selectedTable.seatingCapacity}.`);
+    if (partySize > seatingCapacity) {
+      alert(`Party size cannot exceed seating capacity of ${seatingCapacity}.`);
       return;
     }
 
-    // Ensure the reservation date is today or later
-    const today = new Date().toISOString().split("T")[0];
     if (reservationDate < today) {
-      setError("Reservation date must be today or later.");
+      alert("Reservation date must be today or later.");
       return;
     }
 
     const reservationData = {
-      tableID,
+      tableID: tableID,
       userID: userId,
-      username,
-      restaurantID,
-      reservationDate: reservationDetails.reservationDate,
-      startTime: reservationDetails.startTime,
-      endTime: reservationDetails.endTime,
-      partySize: reservationDetails.partySize,
+      username: username,
+      restaurantID: parseInt(restaurantID, 10),
+      reservationDate: reservationDate,
+      startTime: startTime,
+      endTime: endTime,
+      partySize: partySize,
       specialRequests: reservationDetails.specialRequests,
+    };
+
+    const updatedTableData = {
+      seatingCapacity,
+      isAvailable: false,
     };
 
     try {
       setIsSubmitting(true);
-      console.log("Submitting reservation data:", reservationData);
+
+      // Log the request payload for debugging
+      // console.log("Reservation Data:", reservationData);
 
       // POST request to create reservation
-      const response = await fetch("http://localhost:5236/api/TableReservations", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(reservationData),
-      });
+      const reservationResponse = await fetch(
+        "http://localhost:5236/api/TableReservations",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json-patch+json",
+          },
+          body: JSON.stringify(reservationData),
+        }
+      );
 
-      if (!response.ok) {
-        throw new Error("Failed to create reservation.");
+      if (!reservationResponse.ok) {
+        const errorMessage = await reservationResponse.text();
+        throw new Error(
+          `Failed to create reservation. Server responded with: ${errorMessage}`
+        );
       }
+
+      // PUT request to update table availability
+      const updateTableResponse = await fetch(
+        `http://localhost:5236/api/Tables/${tableID}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(updatedTableData),
+        }
+      );
+
+      if (!updateTableResponse.ok) {
+        throw new Error("Failed to update table availability.");
+      }
+
+      // Refresh table list
+      fetchTables();
 
       // Reset form state
       setSelectedTable(null);
@@ -113,7 +148,7 @@ const ViewRestaurantTables = () => {
         partySize: 0,
         specialRequests: "",
       });
-      setError(null); // Clear error on success
+      setError(null);
     } catch (err) {
       console.error("Error submitting reservation:", err);
       setError(`Error: ${err.message}`);
@@ -235,7 +270,7 @@ const ViewRestaurantTables = () => {
             style={styles.formInput}
             value={reservationDetails.reservationDate}
             onChange={handleChange}
-            min={new Date().toISOString().split("T")[0]} // Set today's date as the minimum date
+            min={today} // Set the minimum date to today
           />
           <label>Start Time:</label>
           <input
