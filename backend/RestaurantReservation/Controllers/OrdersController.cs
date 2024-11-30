@@ -34,6 +34,8 @@ namespace RestaurantReservation.Controllers
                 OrderID = order.OrderID,
                 UserID = order.UserID,
                 RestaurantID = order.RestaurantID,
+                TableID = order.TableID,
+                ReservationID = order.ReservationID,
                 RestaurantName = order.Restaurant.Name,
                 OrderDate = order.OrderDate,
                 TotalAmount = order.TotalAmount,
@@ -41,6 +43,7 @@ namespace RestaurantReservation.Controllers
                 OrderItems = order.OrderItems.Select(oi => new OrderItemDetailsDTO
                 {
                     OrderItemID = oi.OrderItemID,
+                    OrderID = oi.OrderID,
                     MenuItemID = oi.MenuItemID,
                     MenuItemName = oi.MenuItem.Name,
                     Quantity = oi.Quantity
@@ -70,6 +73,8 @@ namespace RestaurantReservation.Controllers
                 OrderID = order.OrderID,
                 UserID = order.UserID,
                 RestaurantID = order.RestaurantID,
+                TableID = order.TableID,
+                ReservationID = order.ReservationID,
                 RestaurantName = order.Restaurant.Name,
                 OrderDate = order.OrderDate,
                 TotalAmount = order.TotalAmount,
@@ -77,6 +82,7 @@ namespace RestaurantReservation.Controllers
                 OrderItems = order.OrderItems.Select(oi => new OrderItemDetailsDTO
                 {
                     OrderItemID = oi.OrderItemID,
+                    OrderID = oi.OrderID,
                     MenuItemID = oi.MenuItemID,
                     MenuItemName = oi.MenuItem.Name,
                     Quantity = oi.Quantity
@@ -129,6 +135,8 @@ namespace RestaurantReservation.Controllers
             {
                 UserID = orderCreateDTO.UserID,
                 RestaurantID = orderCreateDTO.RestaurantID,
+                TableID = orderCreateDTO.TableID,
+                ReservationID = orderCreateDTO.ReservationID,
                 OrderDate = orderCreateDTO.OrderDate,
                 OrderStatus = "pending",
                 TotalAmount = 0 // TotalAmount will be calculated later
