@@ -16,6 +16,9 @@ const ViewRestaurantTables = () => {
     specialRequests: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [restaurantData, setRestaurantData] = useState(null);
+  const [orderItems, setOrderItems] = useState({});
+  const [showOrderForm, setShowOrderForm] = useState(false);
   const location = useLocation();
   const [userId, setUserId] = useState(null);
   const [username, setUsername] = useState(null);
@@ -38,6 +41,17 @@ const ViewRestaurantTables = () => {
     }
   }, [restaurantID]);
 
+  const fetchRestaurantDetails = useCallback(async () => {
+    try {
+      const response = await fetch(`http://localhost:5236/api/Restaurants/${restaurantID}`);
+      const data = await response.json();
+      setRestaurantData(data);
+    } catch (err) {
+      console.error("Error fetching restaurant details:", err);
+      setError("Failed to fetch restaurant details.");
+    }
+  }, [restaurantID]);
+
   useEffect(() => {
     const urlParams = new URLSearchParams(location.search);
     const userIdFromUrl = urlParams.get("userId");
@@ -46,7 +60,8 @@ const ViewRestaurantTables = () => {
     if (usernameFromUrl) setUsername(usernameFromUrl);
 
     fetchTables();
-  }, [location.search, fetchTables]);
+    fetchRestaurantDetails();
+  }, [location.search, fetchTables, fetchRestaurantDetails]);
 
   const handleReserve = (table) => {
     setSelectedTable(table);
@@ -59,8 +74,6 @@ const ViewRestaurantTables = () => {
     }
 
     const { tableID, seatingCapacity } = selectedTable;
-
-    // Validate reservation details
     const { reservationDate, startTime, endTime, partySize } = reservationDetails;
 
     if (startTime >= endTime) {
@@ -98,10 +111,6 @@ const ViewRestaurantTables = () => {
     try {
       setIsSubmitting(true);
 
-      // Log the request payload for debugging
-      // console.log("Reservation Data:", reservationData);
-
-      // POST request to create reservation
       const reservationResponse = await fetch(
         "http://localhost:5236/api/TableReservations",
         {
@@ -120,7 +129,6 @@ const ViewRestaurantTables = () => {
         );
       }
 
-      // PUT request to update table availability
       const updateTableResponse = await fetch(
         `http://localhost:5236/api/Tables/${tableID}`,
         {
@@ -136,10 +144,7 @@ const ViewRestaurantTables = () => {
         throw new Error("Failed to update table availability.");
       }
 
-      // Refresh table list
       fetchTables();
-
-      // Reset form state
       setSelectedTable(null);
       setReservationDetails({
         reservationDate: "",
@@ -149,6 +154,9 @@ const ViewRestaurantTables = () => {
         specialRequests: "",
       });
       setError(null);
+
+      // Show the order form after reservation is submitted
+      setShowOrderForm(true);
     } catch (err) {
       console.error("Error submitting reservation:", err);
       setError(`Error: ${err.message}`);
@@ -163,6 +171,71 @@ const ViewRestaurantTables = () => {
       ...prevDetails,
       [name]: value,
     }));
+  };
+
+  const handleQuantityChange = (menuItemID, operation) => {
+    setOrderItems((prevItems) => {
+      const newQuantity =
+        operation === "increment" ? (prevItems[menuItemID] || 0) + 1 : Math.max(0, (prevItems[menuItemID] || 0) - 1);
+      return {
+        ...prevItems,
+        [menuItemID]: newQuantity,
+      };
+    });
+  };
+
+  const handleSubmitOrder = async () => {
+    try {
+      // Create order
+      const orderData = {
+        userID: userId,
+        restaurantID: restaurantID,
+        orderDate: new Date().toISOString(),
+      };
+
+      const orderResponse = await fetch("http://localhost:5236/api/Orders", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(orderData),
+      });
+
+      if (!orderResponse.ok) {
+        throw new Error("Failed to create order.");
+      }
+
+      const { orderID } = await orderResponse.json();
+
+      // Add items to order if quantity >= 1
+      for (let itemID in orderItems) {
+        const quantity = orderItems[itemID];
+        if (quantity > 0) {
+          const orderItemData = {
+            orderID: orderID,
+            menuItemID: itemID,
+            quantity: quantity,
+          };
+
+          const orderItemResponse = await fetch("http://localhost:5236/api/OrderItems", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(orderItemData),
+          });
+
+          if (!orderItemResponse.ok) {
+            throw new Error("Failed to add order items.");
+          }
+        }
+      }
+
+      alert("Order submitted successfully.");
+    } catch (err) {
+      console.error("Error submitting order:", err);
+      setError(`Error: ${err.message}`);
+    }
   };
 
   const styles = {
@@ -211,17 +284,45 @@ const ViewRestaurantTables = () => {
     },
     formInput: {
       width: "100%",
-      padding: "10px",
-      marginBottom: "10px",
-      borderRadius: "5px",
+      padding: "8px",
+      margin: "10px 0",
+      borderRadius: "4px",
       border: "1px solid #ddd",
-      fontSize: "14px",
     },
     submitButton: {
       padding: "10px 15px",
       backgroundColor: "#28a745",
       color: "white",
       border: "none",
+      borderRadius: "5px",
+      cursor: "pointer",
+      fontSize: "14px",
+    },
+    orderForm: {
+      marginTop: "15px",
+      backgroundColor: "#fff",
+      padding: "20px",
+      borderRadius: "8px",
+      boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+    },
+    menuItemCard: {
+      border: "1px solid #ddd",
+      borderRadius: "8px",
+      padding: "15px",
+      marginBottom: "10px",
+      backgroundColor: "white",
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+    },
+    menuItemDetails: {
+      fontSize: "16px",
+      color: "#555",
+    },
+    quantityButton: {
+      padding: "5px 10px",
+      backgroundColor: "#f0f0f0",
+      border: "1px solid #ddd",
       borderRadius: "5px",
       cursor: "pointer",
       fontSize: "14px",
@@ -293,7 +394,7 @@ const ViewRestaurantTables = () => {
             type="number"
             name="partySize"
             style={styles.formInput}
-            value={reservationDetails.partySize}
+            value={reservationDetails.partySize || ""}
             onChange={handleChange}
             min="1"
           />
@@ -314,6 +415,43 @@ const ViewRestaurantTables = () => {
             disabled={isSubmitting}
           >
             {isSubmitting ? "Submitting..." : "Submit Reservation"}
+          </button>
+        </div>
+      )}
+
+      {showOrderForm && restaurantData && (
+        <div style={styles.orderForm}>
+          <h3>Order Menu</h3>
+          {restaurantData.menuItems.map((item) => (
+            <div key={item.menuItemID} style={styles.menuItemCard}>
+              <div>
+                <p style={styles.menuItemDetails}>
+                  <strong>{item.name}</strong>
+                </p>
+                <p style={styles.menuItemDetails}>{item.description}</p>
+                <p style={styles.menuItemDetails}>${item.price}</p>
+              </div>
+              <div>
+                <button
+                  style={styles.quantityButton}
+                  onClick={() => handleQuantityChange(item.menuItemID, "decrement")}
+                >
+                  -
+                </button>
+                <span style={{ margin: "0 10px" }}>
+                  {orderItems[item.menuItemID] || 0}
+                </span>
+                <button
+                  style={styles.quantityButton}
+                  onClick={() => handleQuantityChange(item.menuItemID, "increment")}
+                >
+                  +
+                </button>
+              </div>
+            </div>
+          ))}
+          <button style={styles.submitButton} onClick={handleSubmitOrder}>
+            Submit Order
           </button>
         </div>
       )}

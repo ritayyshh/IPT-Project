@@ -160,9 +160,95 @@ const AdminViewRestaurant = () => {
     }
   };
   
+  const [editItem, setEditItem] = useState(null); // State to handle the item being edited
+  const [editValues, setEditValues] = useState({ name: "", description: "", price: "" }); // State for edit form values
   
+  const handleEditClick = (item) => {
+    setEditItem(item);
+    setEditValues({
+      name: item.name,
+      description: item.description,
+      price: item.price,
+    });
+  };
   
+  const handleSave = async () => {
+    try {
+      const response = await fetch(
+        `http://localhost:5236/api/MenuItems/${editItem.menuItemID}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json-patch+json",
+          },
+          body: JSON.stringify(editValues),
+        }
+      );
+      if (!response.ok) {
+        throw new Error("Failed to update menu item.");
+      }
+
+      // Update state after successful edit
+      setRestaurant((prevRestaurant) => ({
+        ...prevRestaurant,
+        menuItems: prevRestaurant.menuItems.map((menuItem) =>
+          menuItem.menuItemID === editItem.menuItemID
+            ? { ...menuItem, ...editValues }
+            : menuItem
+        ),
+      }));
+
+      // Close the popup
+      setEditItem(null);
+    } catch (error) {
+      alert(error.message);
+    }
+  };
+
+  const [currentEditingTable, setCurrentEditingTable] = useState(null); // The table being edited
+  const [editingTableValues, setEditingTableValues] = useState({
+    seatingCapacity: 0,
+  }); // Values being edited
+  const openTableEditPopup = (table) => {
+    setCurrentEditingTable(table); // Set the current table being edited
+    setEditingTableValues({
+      seatingCapacity: table.seatingCapacity, // Load current seatingCapacity
+    });
+  };
   
+  const saveEditedTable = async () => {
+    if (!currentEditingTable) return;
+  
+    try {
+      const response = await fetch(`http://localhost:5236/api/Tables/${currentEditingTable.tableID}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          seatingCapacity: parseInt(editingTableValues.seatingCapacity, 10),
+          isAvailable: currentEditingTable.isAvailable, // Keep isAvailable unchanged
+        }),
+      });
+  
+      if (!response.ok) {
+        throw new Error("Failed to update table.");
+      }
+  
+      // Update state after saving
+      setTables((prevTables) =>
+        prevTables.map((table) =>
+          table.tableID === currentEditingTable.tableID
+            ? { ...table, seatingCapacity: parseInt(editingTableValues.seatingCapacity, 10) }
+            : table
+        )
+      );
+  
+      setCurrentEditingTable(null); // Close popup
+    } catch (error) {
+      alert(error.message);
+    }
+  };
 
 
 
@@ -416,17 +502,6 @@ const AdminViewRestaurant = () => {
       {/* Menu Items Section */}
       <div style={styles.section}>
         <h2 style={styles.sectionHeader}>Menu Items</h2>
-        {/* {restaurant?.menuItems?.length > 0 ? (
-          restaurant.menuItems.map((item) => (
-            <div key={item.menuItemID} style={styles.menuItem}>
-              <span>{item.name}</span>
-              <span>PKR {item.price}</span>
-            </div>
-            
-          ))
-        ) : (
-          <p style={styles.detailText}>No menu items available.</p>
-        )} */}
         {restaurant?.menuItems?.length > 0 ? (
           restaurant.menuItems.map((item) => (
             <div
@@ -443,49 +518,167 @@ const AdminViewRestaurant = () => {
               <div style={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
                 <span style={{ fontSize: "16px", fontWeight: "500" }}>{item.name}</span>
                 <span style={{ fontSize: "16px", fontWeight: "500" }}>{item.description}</span>
-                
                 <span style={{ fontSize: "16px", fontWeight: "500", color: "#4CAF50" }}>
                   PKR {item.price}
                 </span>
               </div>
-              <button
-                style={{
-                  backgroundColor: "red",
-                  color: "white",
-                  border: "none",
-                  borderRadius: "4px",
-                  padding: "5px 10px",
-                  cursor: "pointer",
-                  marginLeft: "10px",
-                }}
-                onClick={async () => {
-                  try {
-                    // DELETE request API
-                    const response = await fetch(`http://localhost:5236/api/MenuItems/${item.menuItemID}`, {
-                      method: "DELETE",
-                    });
-                    if (!response.ok) {
-                      throw new Error("Failed to delete menu item.");
-                    }
+              <div style={{ display: "flex", gap: "10px" }}>
+                <button
+                  style={{
+                    backgroundColor: "red",
+                    color: "white",
+                    border: "none",
+                    borderRadius: "4px",
+                    padding: "5px 10px",
+                    cursor: "pointer",
+                    marginLeft: "10px",
+                  }}
+                  onClick={async () => {
+                    try {
+                      // DELETE request API
+                      const response = await fetch(`http://localhost:5236/api/MenuItems/${item.menuItemID}`, {
+                        method: "DELETE",
+                      });
+                      if (!response.ok) {
+                        throw new Error("Failed to delete menu item.");
+                      }
 
-                    // Update state after deletion
-                    setRestaurant((prevRestaurant) => ({
-                      ...prevRestaurant,
-                      menuItems: prevRestaurant.menuItems.filter(
-                        (menuItem) => menuItem.menuItemID !== item.menuItemID
-                      ),
-                    }));
-                  } catch (error) {
-                    alert(error.message);
-                  }
-                }}
-              >
-                Delete
-              </button>
+                      // Update state after deletion
+                      setRestaurant((prevRestaurant) => ({
+                        ...prevRestaurant,
+                        menuItems: prevRestaurant.menuItems.filter(
+                          (menuItem) => menuItem.menuItemID !== item.menuItemID
+                        ),
+                      }));
+                    } catch (error) {
+                      alert(error.message);
+                    }
+                  }}
+                >
+                  Delete
+                </button>
+                <button
+                  style={{
+                    backgroundColor: "#007BFF",
+                    color: "white",
+                    border: "none",
+                    borderRadius: "4px",
+                    padding: "5px 10px",
+                    cursor: "pointer",
+                  }}
+                  onClick={() => handleEditClick(item)}
+                >
+                  Edit
+                </button>
+              </div>
             </div>
           ))
         ) : (
           <p style={styles.detailText}>No menu items available.</p>
+        )}
+        {/* Edit Popup Modal */}
+        {editItem && (
+          <div
+            style={{
+              position: "fixed",
+              top: "0",
+              left: "0",
+              width: "100%",
+              height: "100%",
+              backgroundColor: "rgba(0, 0, 0, 0.5)",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              zIndex: 1000,
+            }}
+          >
+            <div
+              style={{
+                backgroundColor: "white",
+                padding: "20px",
+                borderRadius: "8px",
+                width: "400px",
+                boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)",
+              }}
+            >
+              <h2>Edit Menu Item</h2>
+              <div style={{ marginBottom: "15px" }}>
+                <label style={{ display: "block", marginBottom: "5px" }}>Name:</label>
+                <input
+                  type="text"
+                  value={editValues.name}
+                  onChange={(e) =>
+                    setEditValues((prev) => ({ ...prev, name: e.target.value }))
+                  }
+                  style={{
+                    width: "100%",
+                    padding: "8px",
+                    border: "1px solid #ccc",
+                    borderRadius: "4px",
+                  }}
+                />
+              </div>
+              <div style={{ marginBottom: "15px" }}>
+                <label style={{ display: "block", marginBottom: "5px" }}>Description:</label>
+                <input
+                  type="text"
+                  value={editValues.description}
+                  onChange={(e) =>
+                    setEditValues((prev) => ({ ...prev, description: e.target.value }))
+                  }
+                  style={{
+                    width: "100%",
+                    padding: "8px",
+                    border: "1px solid #ccc",
+                    borderRadius: "4px",
+                  }}
+                />
+              </div>
+              <div style={{ marginBottom: "15px" }}>
+                <label style={{ display: "block", marginBottom: "5px" }}>Price:</label>
+                <input
+                  type="number"
+                  value={editValues.price}
+                  onChange={(e) =>
+                    setEditValues((prev) => ({ ...prev, price: e.target.value }))
+                  }
+                  style={{
+                    width: "100%",
+                    padding: "8px",
+                    border: "1px solid #ccc",
+                    borderRadius: "4px",
+                  }}
+                />
+              </div>
+              <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px" }}>
+                <button
+                  onClick={() => setEditItem(null)}
+                  style={{
+                    backgroundColor: "#ccc",
+                    border: "none",
+                    borderRadius: "4px",
+                    padding: "8px 15px",
+                    cursor: "pointer",
+                  }}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSave}
+                  style={{
+                    backgroundColor: "#007BFF",
+                    color: "white",
+                    border: "none",
+                    borderRadius: "4px",
+                    padding: "8px 15px",
+                    cursor: "pointer",
+                  }}
+                >
+                  Save
+                </button>
+              </div>
+            </div>
+          </div>
         )}
         <h3>Add Menu Item</h3>
         <input
@@ -525,43 +718,156 @@ const AdminViewRestaurant = () => {
         <h2 style={styles.sectionHeader}>Tables</h2>
         {tables.length > 0 ? (
           tables.map((table) => (
-            <div key={table.tableID} style={styles.tableCard}>
-              <div>
-                <p style={styles.detailText}>Table ID: {table.tableID}</p>
-                <p style={styles.detailText}>
-                  Seating Capacity: {table.seatingCapacity}
-                </p>
-                <p style={styles.detailText}>
-                  Status: {table.isAvailable ? "Available" : "Reserved"}
-                </p>
-              </div>
-              {!table.isAvailable && (
+            // <div
+            //   key={table.tableID}
+            //   style={{
+            //     ...styles.tableCard,
+            //     display: "flex",
+            //     justifyContent: "space-between",
+            //     alignItems: "center",
+            //     padding: "10px",
+            //     borderBottom: "1px solid #ccc",
+            //     marginBottom: "10px",
+            //     width: "100%",
+            //   }}
+            // >
+              <div key={table.tableID} style={styles.tableCard}>
                 <div>
-                  <button style={styles.reservationButton} onClick={() => { console.log(table); viewReservationDetails(table.tableID); }}>
-                    View Reservation
-                  </button>
-                  {showPopup && (
-                    <ReservationPopup
-                      reservationDetails={reservationDetails}
-                      onClose={() => setShowPopup(false)} // Close the popup
-                    />
-                  )}
-                  <button style={styles.cancelButton} onClick={() => handleCancelReservation(table.tableID)}>
-                    Cancel Reservation
-                  </button>
+                  <p style={styles.detailText}>Table ID: {table.tableID}</p>
+                  <p style={styles.detailText}>
+                    Seating Capacity: {table.seatingCapacity}
+                  </p>
+                  <p style={styles.detailText}>
+                    Status: {table.isAvailable ? "Available" : "Reserved"}
+                  </p>
                 </div>
-              )}
-              <button
-                style={styles.deleteButton}
-                onClick={() => handleDeleteTable(table.tableID)}
-              >
-                Delete Table
-              </button>
-            </div>
+                {!table.isAvailable && (
+                  <div>
+                    <button style={styles.reservationButton} onClick={() => { console.log(table); viewReservationDetails(table.tableID); }}>
+                      View Reservation
+                    </button>
+                    {showPopup && (
+                      <ReservationPopup
+                        reservationDetails={reservationDetails}
+                        onClose={() => setShowPopup(false)} // Close the popup
+                      />
+                    )}
+                    <button style={styles.cancelButton} onClick={() => handleCancelReservation(table.tableID)}>
+                      Cancel Reservation
+                    </button>
+                  </div>
+                )}
+                <button
+                  style={styles.deleteButton}
+                  onClick={() => handleDeleteTable(table.tableID)}
+                >
+                  Delete Table
+                </button>
+                {/*  */}
+                {table.isAvailable ? (
+                <button
+                  style={{
+                    ...styles.editButton,
+                    backgroundColor: "#007BFF",
+                    color: "white",
+                    border: "none",
+                    borderRadius: "4px",
+                    padding: "5px 10px",
+                    cursor: "pointer",
+                  }}
+                  onClick={() => openTableEditPopup(table)}
+                >
+                  Edit
+                </button>
+                ) : (null)}
+                {/*  */}
+              </div>
+            // </div>
           ))
         ) : (
           <p style={styles.detailText}>No tables available.</p>
         )}
+        {/* Edit Popup Modal */}
+        {currentEditingTable && (
+          <div
+            style={{
+              position: "fixed",
+              top: "0",
+              left: "0",
+              width: "100%",
+              height: "100%",
+              backgroundColor: "rgba(0, 0, 0, 0.5)",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              zIndex: 1000,
+            }}
+          >
+            <div
+              style={{
+                backgroundColor: "white",
+                padding: "20px",
+                borderRadius: "8px",
+                width: "400px",
+                boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)",
+              }}
+            >
+              <h2>Edit Seating Capacity</h2>
+              <div style={{ marginBottom: "15px" }}>
+                <label style={{ display: "block", marginBottom: "5px" }}>
+                  Seating Capacity:
+                </label>
+                <input
+                  type="number"
+                  value={editingTableValues.seatingCapacity}
+                  onChange={(e) =>
+                    setEditingTableValues((prev) => ({
+                      ...prev,
+                      seatingCapacity: e.target.value,
+                    }))
+                  }
+                  style={{
+                    width: "100%",
+                    padding: "8px",
+                    border: "1px solid #ccc",
+                    borderRadius: "4px",
+                  }}
+                />
+              </div>
+              <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px" }}>
+                <button
+                  onClick={() => setCurrentEditingTable(null)}
+                  style={{
+                    backgroundColor: "#ccc",
+                    border: "none",
+                    borderRadius: "4px",
+                    padding: "8px 15px",
+                    cursor: "pointer",
+                  }}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={saveEditedTable}
+                  style={{
+                    backgroundColor: "#007BFF",
+                    color: "white",
+                    border: "none",
+                    borderRadius: "4px",
+                    padding: "8px 15px",
+                    cursor: "pointer",
+                  }}
+                >
+                  Save
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+
+
+
         <h3>Add Table</h3>
         <input
           type="number"
