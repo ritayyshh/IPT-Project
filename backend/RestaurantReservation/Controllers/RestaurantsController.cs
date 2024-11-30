@@ -57,6 +57,7 @@ namespace RestaurantReservation.Controllers
                 {
                     MenuItemID = mi.MenuItemID,
                     Name = mi.Name,
+                    Description = mi.Description,
                     Price = mi.Price
                 }).ToList(),
                 Reviews = r.Reviews.Select(rv => new ReviewDTO
