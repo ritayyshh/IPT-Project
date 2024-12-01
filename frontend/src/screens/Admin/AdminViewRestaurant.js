@@ -250,6 +250,39 @@ const AdminViewRestaurant = () => {
     }
   };
 
+  const [ViewOrderIsModalOpen, setViewOrderIsModalOpen] = useState(false);
+  const [ViewOrderDetails, setViewOrderDetails] = useState(null);
+  const [ViewOrderLoading, setViewOrderLoading] = useState(false);
+  const [ViewOrderError, setViewOrderError] = useState(null);
+
+  // Fetch order details
+  const handleViewOrderClick = async (ViewOrderTableID) => {
+    setViewOrderLoading(true);
+    setViewOrderError(null);
+
+    try {
+      const response = await fetch(`http://localhost:5236/api/Orders/table/${ViewOrderTableID}`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch order details");
+      }
+      const data = await response.json();
+      setViewOrderDetails(data);
+    } catch (err) {
+      setViewOrderError(err.message);
+    } finally {
+      setViewOrderLoading(false);
+      setViewOrderIsModalOpen(true); // Open modal regardless of success
+    }
+  };
+
+  // Close modal
+  const handleCloseModal = () => {
+    setViewOrderIsModalOpen(false);
+    setViewOrderDetails(null);
+    setViewOrderError(null);
+  };
+
+
 
 
 
@@ -454,6 +487,43 @@ const AdminViewRestaurant = () => {
       borderRadius: "5px",
       cursor: "pointer",
       marginRight: "5px",
+    },
+    ViewOrderButton: {
+      padding: "8px 12px",
+      backgroundColor: "green",
+      color: "white",
+      border: "none",
+      borderRadius: "5px",
+      cursor: "pointer",
+      marginRight: "5px",
+    },
+    ModalOverlay: {
+      position: "fixed",
+      top: 0,
+      left: 0,
+      width: "100%",
+      height: "100%",
+      backgroundColor: "rgba(0, 0, 0, 0.5)",
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      zIndex: 1000,
+    },
+    ModalContent: {
+      backgroundColor: "#fff",
+      padding: "20px",
+      borderRadius: "8px",
+      width: "500px",
+      maxWidth: "90%",
+      textAlign: "left",
+    },
+    CloseButton: {
+      backgroundColor: "#ff4d4f",
+      color: "#fff",
+      border: "none",
+      borderRadius: "5px",
+      padding: "5px 10px",
+      cursor: "pointer",
     },
     cancelButton: {
       padding: "8px 12px",
@@ -718,53 +788,90 @@ const AdminViewRestaurant = () => {
         <h2 style={styles.sectionHeader}>Tables</h2>
         {tables.length > 0 ? (
           tables.map((table) => (
-            // <div
-            //   key={table.tableID}
-            //   style={{
-            //     ...styles.tableCard,
-            //     display: "flex",
-            //     justifyContent: "space-between",
-            //     alignItems: "center",
-            //     padding: "10px",
-            //     borderBottom: "1px solid #ccc",
-            //     marginBottom: "10px",
-            //     width: "100%",
-            //   }}
-            // >
-              <div key={table.tableID} style={styles.tableCard}>
+            <div key={table.tableID} style={styles.tableCard}>
+              <div>
+                <p style={styles.detailText}>Table ID: {table.tableID}</p>
+                <p style={styles.detailText}>
+                  Seating Capacity: {table.seatingCapacity}
+                </p>
+                <p style={styles.detailText}>
+                  Status: {table.isAvailable ? "Available" : "Reserved"}
+                </p>
+              </div>
+              {!table.isAvailable && (
                 <div>
-                  <p style={styles.detailText}>Table ID: {table.tableID}</p>
-                  <p style={styles.detailText}>
-                    Seating Capacity: {table.seatingCapacity}
-                  </p>
-                  <p style={styles.detailText}>
-                    Status: {table.isAvailable ? "Available" : "Reserved"}
-                  </p>
+                  <>
+                  <button 
+                    style={styles.ViewOrderButton}
+                    onClick={() => handleViewOrderClick(table.tableID)} // Pass tableID explicitly
+                  >
+                    View Order
+                  </button>
+                  {/* Modal for displaying order details */}
+                  {ViewOrderIsModalOpen && (
+                    <div style={styles.ModalOverlay}>
+                      <div style={styles.ModalContent}>
+                        <button
+                          style={styles.CloseButton}
+                          onClick={handleCloseModal}
+                        >
+                          Close
+                        </button>
+
+                        {/* Loading state */}
+                        {ViewOrderLoading && <p>Loading...</p>}
+
+                        {/* Error state */}
+                        {ViewOrderError && (
+                          <p style={{ color: "red" }}>
+                            Error: {ViewOrderError}
+                          </p>
+                        )}
+
+                        {/* Order details */}
+                        {ViewOrderDetails && (
+                          <div>
+                            <h2>Order Details</h2>
+                            {ViewOrderDetails.map((order) => (
+                              <div key={order.orderID}>
+                                <p><strong>Order ID:</strong> {order.orderID}</p>
+                                <p><strong>Restaurant:</strong> {order.restaurantName}</p>
+                                <p><strong>Order Date:</strong> {new Date(order.orderDate).toLocaleString()}</p>
+                                <p><strong>Total Amount:</strong> PKR {order.totalAmount}</p>
+                                <p><strong>Order Status:</strong> {order.orderStatus}</p>
+                                <h3>Order Items:</h3>
+                                <ul>
+                                  {order.orderItems.map((item) => (
+                                    <li key={item.orderItemID}>
+                                      {item.menuItemName} - Quantity: {item.quantity}
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                  </>
+                  <button style={styles.reservationButton} onClick={() => { console.log(table); viewReservationDetails(table.tableID); }}>
+                    View Reservation
+                  </button>
+                  {showPopup && (
+                    <ReservationPopup
+                      reservationDetails={reservationDetails}
+                      onClose={() => setShowPopup(false)} // Close the popup
+                    />
+                  )}
+                  <button style={styles.cancelButton} onClick={() => handleCancelReservation(table.tableID)}>
+                    Cancel Reservation
+                  </button>
                 </div>
-                {!table.isAvailable && (
-                  <div>
-                    <button style={styles.reservationButton} onClick={() => { console.log(table); viewReservationDetails(table.tableID); }}>
-                      View Reservation
-                    </button>
-                    {showPopup && (
-                      <ReservationPopup
-                        reservationDetails={reservationDetails}
-                        onClose={() => setShowPopup(false)} // Close the popup
-                      />
-                    )}
-                    <button style={styles.cancelButton} onClick={() => handleCancelReservation(table.tableID)}>
-                      Cancel Reservation
-                    </button>
-                  </div>
-                )}
-                <button
-                  style={styles.deleteButton}
-                  onClick={() => handleDeleteTable(table.tableID)}
-                >
-                  Delete Table
-                </button>
-                {/*  */}
-                {table.isAvailable ? (
+              )}
+              {/*  */}
+              {table.isAvailable ? (
+              <>
                 <button
                   style={{
                     ...styles.editButton,
@@ -779,10 +886,16 @@ const AdminViewRestaurant = () => {
                 >
                   Edit
                 </button>
-                ) : (null)}
-                {/*  */}
-              </div>
-            // </div>
+                <button
+                  style={styles.deleteButton}
+                  onClick={() => handleDeleteTable(table.tableID)}
+                >
+                  Delete Table
+                </button>
+              </>
+              ) : (null)}
+              {/*  */}
+            </div>
           ))
         ) : (
           <p style={styles.detailText}>No tables available.</p>
@@ -864,10 +977,7 @@ const AdminViewRestaurant = () => {
             </div>
           </div>
         )}
-
-
-
-
+        
         <h3>Add Table</h3>
         <input
           type="number"

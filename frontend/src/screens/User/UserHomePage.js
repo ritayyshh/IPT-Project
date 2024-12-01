@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
 const UserHomePage = ({ handleLogout, username }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -208,9 +208,9 @@ const UserHomePage = ({ handleLogout, username }) => {
             </a>
           </li>
           <li>
-            <a href="#reservations" style={styles.sidebarLink}>
-              Reservations
-            </a>
+          <Link to={`/reservations/${userId}`} style={styles.sidebarLink}>
+            Reservations
+          </Link>
           </li>
         </ul>
       </div>

@@ -112,6 +112,19 @@ namespace RestaurantReservation.Controllers
             _context.Reviews.Add(review);
             await _context.SaveChangesAsync();
 
+            // Calculate the average rating for the restaurant
+            var averageRating = await _context.Reviews
+                .Where(r => r.RestaurantID == reviewDTO.RestaurantID)
+                .AverageAsync(r => r.Rating);
+
+            // Update the restaurant's AverageRating
+            var restaurant = await _context.Restaurants.FindAsync(reviewDTO.RestaurantID);
+            if (restaurant != null)
+            {
+                restaurant.AverageRating = averageRating;
+                await _context.SaveChangesAsync();
+            }
+
             // Map back to ReviewDetailsDTO for response
             var createdReview = await _context.Reviews
                 .Include(r => r.User)
@@ -141,8 +154,42 @@ namespace RestaurantReservation.Controllers
                 return NotFound();
             }
 
+            // Get the restaurant ID for the review
+            var restaurantId = review.RestaurantID;
+
+            // Remove the review
             _context.Reviews.Remove(review);
             await _context.SaveChangesAsync();
+
+            // Get the remaining reviews for the restaurant
+            var remainingReviews = await _context.Reviews
+                .Where(r => r.RestaurantID == restaurantId)
+                .ToListAsync();
+
+            // Check if there are any remaining reviews
+            if (remainingReviews.Any())
+            {
+                // Calculate the new average rating
+                var averageRating = remainingReviews.Average(r => r.Rating);
+
+                // Update the restaurant's AverageRating
+                var restaurant = await _context.Restaurants.FindAsync(restaurantId);
+                if (restaurant != null)
+                {
+                    restaurant.AverageRating = averageRating;
+                    await _context.SaveChangesAsync();
+                }
+            }
+            else
+            {
+                // No reviews left, set AverageRating to 0 or any default value
+                var restaurant = await _context.Restaurants.FindAsync(restaurantId);
+                if (restaurant != null)
+                {
+                    restaurant.AverageRating = 0;
+                    await _context.SaveChangesAsync();
+                }
+            }
 
             return NoContent();
         }

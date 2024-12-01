@@ -7,6 +7,7 @@ import RegisterPage from './screens/RegisterPage';
 import UserHomePage from './screens/User/UserHomePage';
 import ViewRestaurant from "./screens/User/ViewRestaurant";
 import ViewRestaurantTables from "./screens/User/ViewRestaurantTables";
+import ViewReservation from "./screens/User/ViewReservation";
 
 import AdminHomePage from './screens/Admin/AdminHomePage';
 import AdminViewRestaurant from './screens/Admin/AdminViewRestaurant';
@@ -81,7 +82,8 @@ function App() {
           {/* <Route path="/admin-view-restaurant" element={<AdminViewRestaurant />} /> */}
           <Route path="/adminrestaurants/:restaurantID" element={<AdminViewRestaurant />} />
           
-
+          <Route path="/reservations/:userId" element={<ViewReservation />} />
+        
         </Routes>
       </div>
     </Router>

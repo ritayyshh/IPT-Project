@@ -148,6 +148,36 @@ namespace RestaurantReservation.Controllers
             return NoContent();
         }
 
+        // GET: api/TableReservations/byUser/{userId}
+        [HttpGet("byUser/{userId}")]
+        public async Task<ActionResult<IEnumerable<TableReservationDetailsDTO>>> GetTableReservationsByUser(string userId)
+        {
+            var reservations = await _context.TableReservations
+                .Include(tr => tr.Table)
+                .ThenInclude(t => t.Restaurant)
+                .Where(tr => tr.UserID == userId) // Filter by UserID (string)
+                .Select(tr => new TableReservationDetailsDTO
+                {
+                    TableReservationID = tr.TableReservationID,
+                    TableID = tr.TableID,
+                    RestaurantID = tr.RestaurantID,
+                    Username = tr.Username,
+                    ReservationDate = tr.ReservationDate,
+                    StartTime = tr.StartTime,
+                    EndTime = tr.EndTime,
+                    PartySize = tr.PartySize,
+                    SpecialRequests = tr.SpecialRequests
+                })
+                .ToListAsync();
+
+            if (reservations == null || !reservations.Any())
+            {
+                return NotFound(); // If no reservations found
+            }
+
+            return Ok(reservations);
+        }
+
         private bool TableReservationExists(int id)
         {
             return _context.TableReservations.Any(e => e.TableReservationID == id);
