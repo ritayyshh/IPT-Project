@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { useParams, useLocation } from "react-router-dom";
+import { useParams, useLocation, useNavigate } from "react-router-dom";
 
 const ViewRestaurantTables = () => {
+  const navigate = useNavigate();
   const today = new Date().toISOString().split("T")[0];
   const { restaurantID } = useParams();
   const [tables, setTables] = useState([]);
@@ -22,7 +23,8 @@ const ViewRestaurantTables = () => {
   const location = useLocation();
   const [userId, setUserId] = useState(null);
   const [username, setUsername] = useState(null);
-
+  const [reservationID, setReservationID] = useState(null);
+  
   const fetchTables = useCallback(async () => {
     try {
       const response = await fetch(
@@ -62,6 +64,19 @@ const ViewRestaurantTables = () => {
     fetchTables();
     fetchRestaurantDetails();
   }, [location.search, fetchTables, fetchRestaurantDetails]);
+
+  const fetchTableReservationDetails = async (tableID) => {
+    try {
+      const response = await fetch(`http://localhost:5236/api/Tables/${tableID}`);
+      const tableData = await response.json();
+      const lastReservation = tableData.tableReservations[tableData.tableReservations.length - 1];
+      console.log(lastReservation.reservationID);
+      setReservationID(lastReservation.reservationID);
+    } catch (err) {
+      console.error("Error fetching table reservation details:", err);
+      setError("Failed to fetch table reservation details.");
+    }
+  };
 
   const handleReserve = (table) => {
     setSelectedTable(table);
@@ -145,7 +160,7 @@ const ViewRestaurantTables = () => {
       }
 
       fetchTables();
-      setSelectedTable(null);
+      // setSelectedTable(null);
       setReservationDetails({
         reservationDate: "",
         startTime: "",
@@ -154,6 +169,9 @@ const ViewRestaurantTables = () => {
         specialRequests: "",
       });
       setError(null);
+
+      // Fetch reservation details and show the order form
+      await fetchTableReservationDetails(tableID);
 
       // Show the order form after reservation is submitted
       setShowOrderForm(true);
@@ -185,11 +203,17 @@ const ViewRestaurantTables = () => {
   };
 
   const handleSubmitOrder = async () => {
+    if (!reservationID || !selectedTable) {
+      console.error("Reservation or table details missing.");
+      return;
+    }
     try {
       // Create order
       const orderData = {
         userID: userId,
         restaurantID: restaurantID,
+        tableID: selectedTable.tableID,
+        reservationID: reservationID,
         orderDate: new Date().toISOString(),
       };
 
@@ -230,8 +254,11 @@ const ViewRestaurantTables = () => {
           }
         }
       }
-
+      // 
+      setSelectedTable(null);
+      // 
       alert("Order submitted successfully.");
+      navigate('/user-home');
     } catch (err) {
       console.error("Error submitting order:", err);
       setError(`Error: ${err.message}`);
@@ -429,7 +456,7 @@ const ViewRestaurantTables = () => {
                   <strong>{item.name}</strong>
                 </p>
                 <p style={styles.menuItemDetails}>{item.description}</p>
-                <p style={styles.menuItemDetails}>${item.price}</p>
+                <p style={styles.menuItemDetails}>PKR {item.price}</p>
               </div>
               <div>
                 <button
