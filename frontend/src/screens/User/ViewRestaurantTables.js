@@ -159,7 +159,7 @@ const ViewRestaurantTables = () => {
         throw new Error("Failed to update table availability.");
       }
 
-      fetchTables();
+      // fetchTables();
       // setSelectedTable(null);
       setReservationDetails({
         reservationDate: "",
@@ -254,7 +254,8 @@ const ViewRestaurantTables = () => {
           }
         }
       }
-      // 
+      //
+      fetchTables(); 
       setSelectedTable(null);
       // 
       alert("Order submitted successfully.");
@@ -446,9 +447,9 @@ const ViewRestaurantTables = () => {
         </div>
       )}
 
-      {showOrderForm && restaurantData && (
+      {selectedTable && showOrderForm && restaurantData && (
         <div style={styles.orderForm}>
-          <h3>Order Menu</h3>
+          <h3>Order Menu For Table {selectedTable.tableID} </h3>
           {restaurantData.menuItems.map((item) => (
             <div key={item.menuItemID} style={styles.menuItemCard}>
               <div>

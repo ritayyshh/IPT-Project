@@ -207,6 +207,8 @@ namespace RestaurantReservation.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     UserID = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     RestaurantID = table.Column<int>(type: "int", nullable: false),
+                    TableID = table.Column<int>(type: "int", nullable: false),
+                    ReservationID = table.Column<int>(type: "int", nullable: false),
                     OrderDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     TotalAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     OrderStatus = table.Column<string>(type: "nvarchar(max)", nullable: false)
@@ -341,11 +343,11 @@ namespace RestaurantReservation.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     TableID = table.Column<int>(type: "int", nullable: false),
                     RestaurantID = table.Column<int>(type: "int", nullable: false),
-                    UserID = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    UserID = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     Username = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ReservationDate = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    StartTime = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    EndTime = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ReservationDate = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    StartTime = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    EndTime = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     PartySize = table.Column<int>(type: "int", nullable: false),
                     SpecialRequests = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
@@ -356,8 +358,7 @@ namespace RestaurantReservation.Migrations
                         name: "FK_TableReservations_AspNetUsers_UserID",
                         column: x => x.UserID,
                         principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_TableReservations_Tables_TableID",
                         column: x => x.TableID,
@@ -371,8 +372,8 @@ namespace RestaurantReservation.Migrations
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
                 values: new object[,]
                 {
-                    { "2293338c-02cb-47f4-bc8e-52218889caeb", null, "Admin", "ADMIN" },
-                    { "5d463b54-2440-4fd6-9565-a8cd5db69d51", null, "User", "USER" }
+                    { "3f7c5a1c-fa85-43b2-a6de-9c8f688ba197", null, "Admin", "ADMIN" },
+                    { "f1b8ee55-d1cf-4a44-a9e4-d94b2f3f5d49", null, "User", "USER" }
                 });
 
             migrationBuilder.CreateIndex(

@@ -11,8 +11,8 @@
         public decimal TotalAmount { get; set; }
         public string OrderStatus { get; set; } = string.Empty;
 
-        public AppUser User { get; set; }
-        public Restaurant Restaurant { get; set; }
-        public ICollection<OrderItem> OrderItems { get; set; }
+        public AppUser? User { get; set; }
+        public Restaurant? Restaurant { get; set; }
+        public ICollection<OrderItem>? OrderItems { get; set; }
     }
 }

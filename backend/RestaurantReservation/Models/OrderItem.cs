@@ -7,7 +7,7 @@
         public int MenuItemID { get; set; }
         public int Quantity { get; set; }
 
-        public Order Order { get; set; }
-        public MenuItem MenuItem { get; set; }
+        public Order? Order { get; set; }
+        public MenuItem? MenuItem { get; set; }
     }
 }

@@ -51,13 +51,13 @@ namespace RestaurantReservation.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "0110448f-f991-43c2-8f13-f214b8e22d8a",
+                            Id = "3f7c5a1c-fa85-43b2-a6de-9c8f688ba197",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "bd1d549d-738c-48de-9e3b-6b40aded2924",
+                            Id = "f1b8ee55-d1cf-4a44-a9e4-d94b2f3f5d49",
                             Name = "User",
                             NormalizedName = "USER"
                         });
@@ -437,14 +437,12 @@ namespace RestaurantReservation.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TableReservationID"));
 
                     b.Property<string>("EndTime")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("PartySize")
                         .HasColumnType("int");
 
                     b.Property<string>("ReservationDate")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("RestaurantID")
@@ -455,14 +453,12 @@ namespace RestaurantReservation.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("StartTime")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("TableID")
                         .HasColumnType("int");
 
                     b.Property<string>("UserID")
-                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Username")
@@ -648,9 +644,7 @@ namespace RestaurantReservation.Migrations
 
                     b.HasOne("RestaurantReservation.Models.AppUser", "User")
                         .WithMany("TableReservations")
-                        .HasForeignKey("UserID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("UserID");
 
                     b.Navigation("Table");
 

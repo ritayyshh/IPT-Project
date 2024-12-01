@@ -7,7 +7,7 @@
         public int SeatingCapacity { get; set; }
         public bool IsAvailable { get; set; }
 
-        public Restaurant Restaurant { get; set; }
-        public ICollection<TableReservation> TableReservations { get; set; }
+        public Restaurant? Restaurant { get; set; }
+        public ICollection<TableReservation>? TableReservations { get; set; }
     }
 }
