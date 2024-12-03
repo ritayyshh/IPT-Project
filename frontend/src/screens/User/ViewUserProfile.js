@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 
 const ViewUserProfile = ({ handleLogout }) => {
@@ -12,6 +12,7 @@ const ViewUserProfile = ({ handleLogout }) => {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [passwordError, setPasswordError] = useState('');
+  const navigate = useNavigate();
 
   // Fetch user details on component mount
   useEffect(() => {
@@ -37,7 +38,7 @@ const ViewUserProfile = ({ handleLogout }) => {
     }
 
     try {
-      const response = await axios.post('http://localhost:5236/api/account/changePasswordByUserId', {
+      await axios.post('http://localhost:5236/api/account/changePasswordByUserId', {
         userID: userId,
         oldPassword,
         newPassword,
@@ -63,7 +64,14 @@ const ViewUserProfile = ({ handleLogout }) => {
       {/* Navbar */}
       <nav style={styles.navBar}>
         <div style={styles.navLinks}>
-          <a href="#home" style={styles.navLink}>Home</a>
+          <a href="#home"
+            onClick={(e) => {
+              e.preventDefault(); // Prevent the default anchor behavior
+              navigate("/user-home"); // Navigate to the desired route
+            }} 
+            style={styles.navLink}>
+            Home
+          </a>
           <a href="#about" style={styles.navLink}>About Us</a>
           <a href="#contact" style={styles.navLink}>Contact Us</a>
         </div>

@@ -21,7 +21,7 @@ const AddRestaurant = ({ handleLogout }) => {
     e.preventDefault();
 
     try {
-      const response = await axios.post('http://localhost:5236/api/Restaurants', restaurantData, {
+      await axios.post('http://localhost:5236/api/Restaurants', restaurantData, {
         headers: {
           'Content-Type': 'application/json'
         }

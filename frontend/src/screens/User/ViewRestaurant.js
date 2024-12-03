@@ -307,14 +307,14 @@ const ViewRestaurant = ({ handleLogout }) => {
       borderRadius: "8px",
       boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
     },
-    input: {
-      padding: "10px",
-      marginBottom: "15px",
-      width: "100%",
-      borderRadius: "5px",
-      border: "1px solid #ddd",
-      fontSize: "16px",
-    },
+    // input: {
+    //   padding: "10px",
+    //   marginBottom: "15px",
+    //   width: "100%",
+    //   borderRadius: "5px",
+    //   border: "1px solid #ddd",
+    //   fontSize: "16px",
+    // },
     button: {
       padding: "10px 15px",
       backgroundColor: "#28a745",
@@ -326,15 +326,17 @@ const ViewRestaurant = ({ handleLogout }) => {
       width: "100%",
     },
     popup: {
-      position: "fixed",
-      top: "50%",
-      left: "50%",
-      transform: "translate(-50%, -50%)",
-      backgroundColor: "#fff",
-      padding: "20px",
-      borderRadius: "10px",
-      zIndex: 1000,
-      boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
+      position: 'fixed',
+      top: '50%',
+      left: '50%',
+      transform: 'translate(-50%, -50%)',
+      backgroundColor: '#fff',
+      padding: '2rem',
+      borderRadius: '8px',
+      boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.2)',
+      zIndex: 1001,
+      maxWidth: '400px',
+      width: '90%', // Responsive width
     },
     overlay: {
       position: "fixed",
@@ -344,6 +346,62 @@ const ViewRestaurant = ({ handleLogout }) => {
       height: "100%",
       backgroundColor: "rgba(0, 0, 0, 0.5)",
       zIndex: 999,
+    },
+    label: {
+      display: 'block',
+      marginBottom: '1rem',
+      fontSize: '1rem',
+      fontWeight: '500',
+      color: '#333',
+    },
+    input: {
+      width: '100%',
+      padding: '0.5rem',
+      fontSize: '1rem',
+      border: '1px solid #ccc',
+      borderRadius: '4px',
+      marginTop: '0.5rem',
+    },
+    textarea: {
+      width: '100%',
+      height: '100px',
+      padding: '0.5rem',
+      fontSize: '1rem',
+      border: '1px solid #ccc',
+      borderRadius: '4px',
+      marginTop: '0.5rem',
+      resize: 'none',
+    },
+    buttonContainer: {
+      display: 'flex',
+      justifyContent: 'space-between',
+      marginTop: '1.5rem',
+    },
+    saveButton: {
+      backgroundColor: '#28a745',
+      color: '#fff',
+      border: 'none',
+      padding: '0.75rem 1.5rem',
+      fontSize: '1rem',
+      borderRadius: '4px',
+      cursor: 'pointer',
+      transition: 'background-color 0.3s',
+    },
+    saveButtonHover: {
+      backgroundColor: '#218838',
+    },
+    cancelButton: {
+      backgroundColor: '#dc3545',
+      color: '#fff',
+      border: 'none',
+      padding: '0.75rem 1.5rem',
+      fontSize: '1rem',
+      borderRadius: '4px',
+      cursor: 'pointer',
+      transition: 'background-color 0.3s',
+    },
+    cancelButtonHover: {
+      backgroundColor: '#c82333',
     },
   };
 
@@ -439,14 +497,14 @@ const ViewRestaurant = ({ handleLogout }) => {
               <>
                 <div style={styles.overlay} />
                 <div style={styles.popup}>
-                  <h2>Edit Review</h2>
+                  <h2 style={{ marginBottom: '1rem', textAlign: 'center' }}>Edit Review</h2>
                   <form
                     onSubmit={(e) => {
                       e.preventDefault();
                       handleEditReview();
                     }}
                   >
-                    <label>
+                    <label style={styles.label}>
                       Rating (1-5):
                       <input
                         type="number"
@@ -456,25 +514,32 @@ const ViewRestaurant = ({ handleLogout }) => {
                         min="1"
                         max="5"
                         required
+                        style={styles.input}
                       />
-
                     </label>
                     <br />
-                    <label>
+                    <label style={styles.label}>
                       Comment:
                       <textarea
                         value={editComment}
                         onChange={(e) => setEditComment(e.target.value)}
                         required
+                        style={styles.textarea}
                       />
                     </label>
                     <br />
-                    <button type="submit" disabled={isEditing}>
-                      {isEditing ? "Saving..." : "Save"}
-                    </button>
-                    <button type="button" onClick={() => setEditingReview(null)}>
-                      Cancel
-                    </button>
+                    <div style={styles.buttonContainer}>
+                      <button type="submit" disabled={isEditing} style={styles.saveButton}>
+                        {isEditing ? "Saving..." : "Save"}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setEditingReview(null)}
+                        style={styles.cancelButton}
+                      >
+                        Cancel
+                      </button>
+                    </div>
                   </form>
                 </div>
               </>
