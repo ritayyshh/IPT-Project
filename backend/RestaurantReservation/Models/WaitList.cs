@@ -12,5 +12,4 @@
         public Restaurant Restaurant { get; set; }
         public AppUser User { get; set; }
     }
-
 }
