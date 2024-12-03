@@ -12,7 +12,7 @@ using RestaurantReservation.Data;
 namespace RestaurantReservation.Migrations
 {
     [DbContext(typeof(AppDBContext))]
-    [Migration("20241203080801_Init")]
+    [Migration("20241203181236_Init")]
     partial class Init
     {
         /// <inheritdoc />
@@ -54,13 +54,13 @@ namespace RestaurantReservation.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "3cee5dfc-96ab-40ff-94a9-8f13a76a6253",
+                            Id = "125494f1-426a-4b1e-aab3-16dfd15f9e33",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "14bae5c8-3c47-4e8b-a961-7eac07dd3d87",
+                            Id = "5c05871e-1e51-4711-b098-b7e47e61b267",
                             Name = "User",
                             NormalizedName = "USER"
                         });

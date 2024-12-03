@@ -374,8 +374,8 @@ namespace RestaurantReservation.Migrations
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
                 values: new object[,]
                 {
-                    { "14bae5c8-3c47-4e8b-a961-7eac07dd3d87", null, "User", "USER" },
-                    { "3cee5dfc-96ab-40ff-94a9-8f13a76a6253", null, "Admin", "ADMIN" }
+                    { "125494f1-426a-4b1e-aab3-16dfd15f9e33", null, "Admin", "ADMIN" },
+                    { "5c05871e-1e51-4711-b098-b7e47e61b267", null, "User", "USER" }
                 });
 
             migrationBuilder.CreateIndex(
