@@ -9,6 +9,7 @@ import UserHomePage from './screens/User/UserHomePage';
 import ViewRestaurant from "./screens/User/ViewRestaurant";
 import ViewRestaurantTables from "./screens/User/ViewRestaurantTables";
 import ViewReservation from "./screens/User/ViewReservation";
+import ViewUserProfile from "./screens/User/ViewUserProfile";
 
 import AdminHomePage from './screens/Admin/AdminHomePage';
 import AdminViewRestaurant from './screens/Admin/AdminViewRestaurant';
@@ -45,6 +46,8 @@ function App() {
           <Route path="/ViewRestaurantTables/:restaurantID" element={ token && !isAdmin ? ( <ViewRestaurantTables handleLogout={handleLogout} />
                                                                                           ) : ( <Navigate to="/login" replace /> )} />
           <Route path="/reservations/:userId" element={ token && !isAdmin ? ( <ViewReservation handleLogout={handleLogout} />
+                                                                            ) : ( <Navigate to="/login" replace /> )} />
+          <Route path="/userprofile/:userId" element={ token && !isAdmin ? ( <ViewUserProfile handleLogout={handleLogout} />
                                                                             ) : ( <Navigate to="/login" replace /> )} />
 
           {/* Admin Pages */}

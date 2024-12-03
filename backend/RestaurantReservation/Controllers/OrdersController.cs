@@ -244,6 +244,45 @@ namespace RestaurantReservation.Controllers
 
             return Ok(orderDetailsDTOs);
         }
+        // GET: api/Orders/byReservation/{reservationId}
+        [HttpGet("byReservation/{reservationId}")]
+        public async Task<ActionResult<IEnumerable<OrderDetailsDTO>>> GetOrdersByReservationId(int reservationId)
+        {
+            var orders = await _context.Orders
+                .Where(o => o.ReservationID == reservationId) // Filter by ReservationID
+                .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.MenuItem)
+                .Include(o => o.Restaurant)
+                .ToListAsync();
+
+            if (orders == null || !orders.Any())
+            {
+                return NotFound(); // If no orders found
+            }
+
+            var orderDetailsDTOs = orders.Select(order => new OrderDetailsDTO
+            {
+                OrderID = order.OrderID,
+                UserID = order.UserID,
+                RestaurantID = order.RestaurantID,
+                TableID = order.TableID,
+                ReservationID = order.ReservationID,
+                RestaurantName = order.Restaurant.Name,
+                OrderDate = order.OrderDate,
+                TotalAmount = order.TotalAmount,
+                OrderStatus = order.OrderStatus,
+                OrderItems = order.OrderItems.Select(oi => new OrderItemDetailsDTO
+                {
+                    OrderItemID = oi.OrderItemID,
+                    OrderID = oi.OrderID,
+                    MenuItemID = oi.MenuItemID,
+                    MenuItemName = oi.MenuItem.Name,
+                    Quantity = oi.Quantity
+                }).ToList()
+            }).ToList();
+
+            return Ok(orderDetailsDTOs);
+        }
 
         private bool OrderExists(int id)
         {

@@ -343,6 +343,7 @@ namespace RestaurantReservation.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     TableID = table.Column<int>(type: "int", nullable: false),
                     RestaurantID = table.Column<int>(type: "int", nullable: false),
+                    RestaurantName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     UserID = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     Username = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     ReservationDate = table.Column<string>(type: "nvarchar(max)", nullable: true),
@@ -358,7 +359,8 @@ namespace RestaurantReservation.Migrations
                         name: "FK_TableReservations_AspNetUsers_UserID",
                         column: x => x.UserID,
                         principalTable: "AspNetUsers",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_TableReservations_Tables_TableID",
                         column: x => x.TableID,
@@ -372,8 +374,8 @@ namespace RestaurantReservation.Migrations
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
                 values: new object[,]
                 {
-                    { "6e294bed-07c5-4cfb-b2bd-e24a8b622d89", null, "Admin", "ADMIN" },
-                    { "b77116a3-5d44-4160-872c-a9e1eea92fee", null, "User", "USER" }
+                    { "14bae5c8-3c47-4e8b-a961-7eac07dd3d87", null, "User", "USER" },
+                    { "3cee5dfc-96ab-40ff-94a9-8f13a76a6253", null, "Admin", "ADMIN" }
                 });
 
             migrationBuilder.CreateIndex(

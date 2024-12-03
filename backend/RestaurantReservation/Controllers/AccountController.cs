@@ -113,5 +113,101 @@ namespace RestaurantReservation.Controllers
                 return StatusCode(500, ex.Message);
             }
         }
+        [HttpGet("getUserDetails/{userId}")]
+        public async Task<IActionResult> GetUserDetails(string userId)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(userId))
+                    return BadRequest("User ID cannot be empty");
+
+                // Find user by userId
+                var user = await _userManager.Users.FirstOrDefaultAsync(x => x.Id == userId);
+
+                if (user == null)
+                    return NotFound("User not found");
+
+                // Return user details
+                return Ok(new NewUserDTO
+                {
+                    FirstName = user.FirstName,
+                    LastName = user.LastName,
+                    Username = user.UserName,
+                    Email = user.Email,
+                    Token = _tokenService.CreateToken(user) // Include token if required
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+        [HttpDelete("deleteUser/{userId}")]
+        public async Task<IActionResult> DeleteUser(string userId)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(userId))
+                    return BadRequest("User ID cannot be empty");
+
+                // Find user by userId
+                var user = await _userManager.Users.FirstOrDefaultAsync(x => x.Id == userId);
+
+                if (user == null)
+                    return NotFound("User not found");
+
+                // Delete the user
+                var result = await _userManager.DeleteAsync(user);
+
+                if (!result.Succeeded)
+                    return StatusCode(500, result.Errors);
+
+                return Ok($"User with ID {userId} deleted successfully.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+        [HttpPost("changePasswordByUserId")]
+        public async Task<IActionResult> ChangePasswordByUserId([FromBody] ChangePasswordDTO changePasswordDTO)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                    return BadRequest(ModelState);
+
+                // Validate that the new password and confirm password match
+                if (changePasswordDTO.NewPassword != changePasswordDTO.ConfirmPassword)
+                {
+                    return BadRequest("New password and confirm password do not match.");
+                }
+
+                // Find the user by their userId
+                var user = await _userManager.FindByIdAsync(changePasswordDTO.UserID);
+
+                if (user == null)
+                    return NotFound("User not found!");
+
+                // Check if the old password is correct
+                var result = await _signInManager.CheckPasswordSignInAsync(user, changePasswordDTO.OldPassword, false);
+
+                if (!result.Succeeded)
+                    return Unauthorized("Old password is incorrect!");
+
+                // Update the password
+                var passwordChangeResult = await _userManager.ChangePasswordAsync(user, changePasswordDTO.OldPassword, changePasswordDTO.NewPassword);
+
+                if (!passwordChangeResult.Succeeded)
+                    return StatusCode(500, passwordChangeResult.Errors);
+
+                return Ok("Password changed successfully.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
     }
 }

@@ -5,6 +5,7 @@
         public int TableReservationID { get; set; }
         public int TableID { get; set; }
         public int RestaurantID { get; set; }
+        public string RestaurantName { get; set; }
         public string? UserID {get; set; }
         public string Username { get; set; } = string.Empty;
         public string? ReservationDate { get; set; }

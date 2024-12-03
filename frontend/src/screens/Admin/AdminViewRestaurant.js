@@ -45,8 +45,8 @@ const AdminViewRestaurant = ({ handleLogout }) => {
           <h3>Reservation Details</h3>
           {/* <p><strong>Reservation ID:</strong> {reservationDetails?.tableReservationID}</p> */}
           <p><strong>Table Number:</strong> {reservationDetails?.tableID}</p>
-          <p><strong>[Restaurant Name:]</strong></p>
-          <p><strong>[FullName]</strong></p>
+          <p><strong>Restaurant Name: {reservationDetails?.restaurantName}</strong></p>
+          <p><strong>User: {reservationDetails?.username}</strong></p>
           
           {/* <p><strong>Restaurant ID:</strong> {reservationDetails?.restaurantID}</p> */}
           {/* <p><strong>Username:</strong> {reservationDetails?.username}</p> */}
@@ -1017,7 +1017,7 @@ const AdminViewRestaurant = ({ handleLogout }) => {
             <div key={review.reviewID} style={styles.reviewCard}>
               <p style={styles.reviewText}>
                 {/* <strong>User:</strong> {review.userName} */}
-                <strong>User:</strong> [FullName]
+                <strong>User:</strong> {review.userName}
               </p>
               <p style={styles.reviewText}>
                 <strong>Rating:</strong> {review.rating}

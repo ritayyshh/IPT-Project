@@ -55,6 +55,7 @@ namespace RestaurantReservation.Controllers
                     TableReservationID = tr.TableReservationID,
                     TableID = tr.TableID,
                     RestaurantID = tr.RestaurantID,
+                    RestaurantName = tr.RestaurantName,
                     Username = tr.Username,
                     ReservationDate = tr.ReservationDate,
                     StartTime = tr.StartTime,
@@ -119,6 +120,7 @@ namespace RestaurantReservation.Controllers
                 UserID = createDTO.UserID,
                 Username = createDTO.Username,
                 RestaurantID = createDTO.RestaurantID,
+                RestaurantName = createDTO.RestaurantName,
                 ReservationDate = createDTO.ReservationDate,
                 StartTime = createDTO.StartTime,
                 EndTime = createDTO.EndTime,
@@ -131,22 +133,47 @@ namespace RestaurantReservation.Controllers
 
             return CreatedAtAction(nameof(GetTableReservation), new { id = tableReservation.TableReservationID }, tableReservation);
         }
-
-        // DELETE: api/TableReservations/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteTableReservation(int id)
         {
-            var reservation = await _context.TableReservations.FindAsync(id);
+            // Find the TableReservation
+            var reservation = await _context.TableReservations
+                .FirstOrDefaultAsync(tr => tr.TableReservationID == id);
+
             if (reservation == null)
             {
                 return NotFound();
             }
 
+            // Find the Orders related to the TableReservation
+            var orders = await _context.Orders
+                .Where(o => o.ReservationID == id)
+                .ToListAsync();
+
+            if (orders.Any())
+            {
+                foreach (var order in orders)
+                {
+                    // Delete related OrderItems first
+                    var orderItems = await _context.OrderItems
+                        .Where(oi => oi.OrderID == order.OrderID)
+                        .ToListAsync();
+
+                    _context.OrderItems.RemoveRange(orderItems);  // Delete all related order items
+
+                    // Then delete the Order
+                    _context.Orders.Remove(order);
+                }
+            }
+
+            // Finally, remove the TableReservation
             _context.TableReservations.Remove(reservation);
-            await _context.SaveChangesAsync();
+
+            await _context.SaveChangesAsync();  // Save changes
 
             return NoContent();
         }
+
 
         // GET: api/TableReservations/byUser/{userId}
         [HttpGet("byUser/{userId}")]
@@ -161,6 +188,7 @@ namespace RestaurantReservation.Controllers
                     TableReservationID = tr.TableReservationID,
                     TableID = tr.TableID,
                     RestaurantID = tr.RestaurantID,
+                    RestaurantName = tr.RestaurantName,
                     Username = tr.Username,
                     ReservationDate = tr.ReservationDate,
                     StartTime = tr.StartTime,

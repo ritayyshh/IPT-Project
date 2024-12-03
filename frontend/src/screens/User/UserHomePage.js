@@ -9,6 +9,7 @@ const UserHomePage = ({ handleLogout, username }) => {
   const [error, setError] = useState(null);
   const [userId, setUserId] = useState(null); // Store userId
   const navigate = useNavigate();
+  const [FullName, setFullName] = useState(null);
 
   useEffect(() => {
     // Fetch data from the API to get the userId
@@ -20,6 +21,19 @@ const UserHomePage = ({ handleLogout, username }) => {
         }
         const data = await response.json();
         setUserId(data.userId);
+        const InhanduserId = data.userId;
+        if (InhanduserId) {
+          // Once we have the userId, we make the second GET request to fetch user details
+          const userDetailsResponse = await fetch(`http://localhost:5236/api/account/getUserDetails/${InhanduserId}`);
+          
+          if (!userDetailsResponse.ok) {
+            throw new Error('Failed to fetch user details');
+          }
+          
+          const userDetailsData = await userDetailsResponse.json();
+          // setFullName(userDetailsData.firstName userDetailsData.lastName); // Store the user details
+          setFullName(userDetailsData.firstName + " " + userDetailsData.lastName);
+        }
       } catch (err) {
         setError(err.message);
       }
@@ -199,14 +213,14 @@ const UserHomePage = ({ handleLogout, username }) => {
         </div>
         <ul style={styles.sidebarLinks}>
           <li>
-            <a href="#profile" style={styles.sidebarLink}>
+            <Link to={`/userprofile/${userId}`} style={styles.sidebarLink}>
               Profile
-            </a>
+            </Link>
           </li>
           <li>
-          <Link to={`/reservations/${userId}`} style={styles.sidebarLink}>
-            Reservations
-          </Link>
+            <Link to={`/reservations/${userId}`} style={styles.sidebarLink}>
+              Reservations
+            </Link>
           </li>
         </ul>
       </div>
@@ -241,7 +255,7 @@ const UserHomePage = ({ handleLogout, username }) => {
         {/* Page Content */}
         <div>
           <h1 style={styles.contentHeader}>
-            Welcome, [FullName]
+            Welcome, {FullName}
           </h1>
           <p style={styles.contentText}>
             Explore restaurants, provide reviews, and manage reservations using

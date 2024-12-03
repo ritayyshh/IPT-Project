@@ -51,13 +51,13 @@ namespace RestaurantReservation.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "6e294bed-07c5-4cfb-b2bd-e24a8b622d89",
+                            Id = "3cee5dfc-96ab-40ff-94a9-8f13a76a6253",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "b77116a3-5d44-4160-872c-a9e1eea92fee",
+                            Id = "14bae5c8-3c47-4e8b-a961-7eac07dd3d87",
                             Name = "User",
                             NormalizedName = "USER"
                         });
@@ -448,6 +448,10 @@ namespace RestaurantReservation.Migrations
                     b.Property<int>("RestaurantID")
                         .HasColumnType("int");
 
+                    b.Property<string>("RestaurantName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("SpecialRequests")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -644,7 +648,8 @@ namespace RestaurantReservation.Migrations
 
                     b.HasOne("RestaurantReservation.Models.AppUser", "User")
                         .WithMany("TableReservations")
-                        .HasForeignKey("UserID");
+                        .HasForeignKey("UserID")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("Table");
 

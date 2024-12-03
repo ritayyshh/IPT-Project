@@ -9,7 +9,7 @@ namespace RestaurantReservation.Data
     {
         public AppDBContext(DbContextOptions<AppDBContext> options) : base(options)
         {
-            
+
         }
         public DbSet<Restaurant> Restaurants { get; set; }
         public DbSet<MenuItem> MenuItems { get; set; }
@@ -21,82 +21,81 @@ namespace RestaurantReservation.Data
         public DbSet<Waitlist> Waitlists { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // Apply Identity configurations
             base.OnModelCreating(modelBuilder);
 
-            // ApplicationUser Relationships
+            // TableReservation → User
             modelBuilder.Entity<TableReservation>()
                 .HasOne(tr => tr.User)
                 .WithMany(u => u.TableReservations)
-                .HasForeignKey(tr => tr.UserID);
+                .HasForeignKey(tr => tr.UserID)
+                .OnDelete(DeleteBehavior.Cascade);
 
+            // Order → User
             modelBuilder.Entity<Order>()
                 .HasOne(o => o.User)
                 .WithMany(u => u.Orders)
-                .HasForeignKey(o => o.UserID);
+                .HasForeignKey(o => o.UserID)
+                .OnDelete(DeleteBehavior.Cascade);
 
+            // Review → User
             modelBuilder.Entity<Review>()
                 .HasOne(r => r.User)
                 .WithMany(u => u.Reviews)
-                .HasForeignKey(r => r.UserID);
+                .HasForeignKey(r => r.UserID)
+                .OnDelete(DeleteBehavior.Cascade);
 
+            // Waitlist → User
             modelBuilder.Entity<Waitlist>()
                 .HasOne(w => w.User)
                 .WithMany(u => u.Waitlists)
-                .HasForeignKey(w => w.UserID);
+                .HasForeignKey(w => w.UserID)
+                .OnDelete(DeleteBehavior.Cascade);
 
-            // Restaurant Relationships
+            // MenuItem → Restaurant
             modelBuilder.Entity<MenuItem>()
                 .HasOne(m => m.Restaurant)
                 .WithMany(r => r.MenuItems)
                 .HasForeignKey(m => m.RestaurantID);
 
+            // Review → Restaurant
             modelBuilder.Entity<Review>()
                 .HasOne(r => r.Restaurant)
                 .WithMany(r => r.Reviews)
                 .HasForeignKey(r => r.RestaurantID);
 
+            // Order → Restaurant
             modelBuilder.Entity<Order>()
                 .HasOne(o => o.Restaurant)
                 .WithMany(r => r.Orders)
                 .HasForeignKey(o => o.RestaurantID);
 
+            // Table → Restaurant
             modelBuilder.Entity<Table>()
                 .HasOne(t => t.Restaurant)
                 .WithMany(r => r.Tables)
                 .HasForeignKey(t => t.RestaurantID);
 
+            // Waitlist → Restaurant
             modelBuilder.Entity<Waitlist>()
                 .HasOne(w => w.Restaurant)
                 .WithMany(r => r.Waitlists)
                 .HasForeignKey(w => w.RestaurantID);
 
+            // Order → OrderItems
             modelBuilder.Entity<Order>()
-            .HasMany(o => o.OrderItems)  // Order has many OrderItems
-            .WithOne(oi => oi.Order)     // OrderItem has one Order
-            .HasForeignKey(oi => oi.OrderID) // Explicitly specify FK
-            .OnDelete(DeleteBehavior.Restrict); // Restrict deletion
-
-
-            modelBuilder.Entity<MenuItem>()
-            .HasMany(mi => mi.OrderItems)
-            .WithOne(oi => oi.MenuItem)
-            .OnDelete(DeleteBehavior.Restrict);
-
-            // Order Relationships
-            modelBuilder.Entity<OrderItem>()
-                .HasOne(oi => oi.Order)
-                .WithMany(o => o.OrderItems)
+                .HasMany(o => o.OrderItems)
+                .WithOne(oi => oi.Order)
                 .HasForeignKey(oi => oi.OrderID)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<OrderItem>()
-                .HasOne(oi => oi.MenuItem)
-                .WithMany(mi => mi.OrderItems)
+            // MenuItem → OrderItems
+            modelBuilder.Entity<MenuItem>()
+                .HasMany(mi => mi.OrderItems)
+                .WithOne(oi => oi.MenuItem)
                 .HasForeignKey(oi => oi.MenuItemID)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Table Relationships
+            // TableReservation → Table
             modelBuilder.Entity<TableReservation>()
                 .HasOne(tr => tr.Table)
                 .WithMany(t => t.TableReservations)
@@ -105,12 +104,13 @@ namespace RestaurantReservation.Data
             // Fluent API for Additional Constraints
             modelBuilder.Entity<Restaurant>()
                 .Property(r => r.AverageRating)
-                .HasPrecision(2, 1); // E.g., Max rating: 10.0
+                .HasPrecision(2, 1);
 
             modelBuilder.Entity<MenuItem>()
                 .Property(mi => mi.Price)
-                .HasColumnType("decimal(10, 2)"); // Ensures proper price precision
+                .HasColumnType("decimal(10, 2)");
 
+            // Seed Roles
             List<IdentityRole> roles = new List<IdentityRole>
             {
                 new IdentityRole
@@ -126,6 +126,7 @@ namespace RestaurantReservation.Data
             };
             modelBuilder.Entity<IdentityRole>().HasData(roles);
         }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.ConfigureWarnings(warnings =>

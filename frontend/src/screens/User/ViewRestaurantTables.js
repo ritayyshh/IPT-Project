@@ -24,6 +24,8 @@ const ViewRestaurantTables = ({ handleLogout }) => {
   const [userId, setUserId] = useState(null);
   const [username, setUsername] = useState(null);
   const [reservationID, setReservationID] = useState(null);
+  // const [restaurantName, setRestaurantName] = useState(null);
+  
   
   const fetchTables = useCallback(async () => {
     try {
@@ -48,6 +50,7 @@ const ViewRestaurantTables = ({ handleLogout }) => {
       const response = await fetch(`http://localhost:5236/api/Restaurants/${restaurantID}`);
       const data = await response.json();
       setRestaurantData(data);
+      console.log(data.name);
     } catch (err) {
       console.error("Error fetching restaurant details:", err);
       setError("Failed to fetch restaurant details.");
@@ -111,6 +114,7 @@ const ViewRestaurantTables = ({ handleLogout }) => {
       userID: userId,
       username: username,
       restaurantID: parseInt(restaurantID, 10),
+      restaurantName: restaurantData.name,
       reservationDate: reservationDate,
       startTime: startTime,
       endTime: endTime,

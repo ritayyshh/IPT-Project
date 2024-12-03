@@ -62,13 +62,27 @@ const ViewRestaurant = ({ handleLogout }) => {
       if (!response.ok) {
         throw new Error("Failed to delete the review");
       }
-      // Update the restaurant reviews after deletion
+
+      // Remove the review from the list
+      const updatedReviews = restaurant.reviews.filter(
+        (review) => review.reviewID !== reviewID
+      );
+
+      // Recalculate average rating
+      const newAverageRating =
+        updatedReviews.length > 0
+          ? updatedReviews.reduce((sum, review) => sum + review.rating, 0) /
+            updatedReviews.length
+          : 0;
+
+      // Update the restaurant state
       setRestaurant((prev) => ({
         ...prev,
-        reviews: prev.reviews.filter((review) => review.reviewID !== reviewID),
+        reviews: updatedReviews,
+        averageRating: newAverageRating.toFixed(2), // Limit to 2 decimal places
       }));
     } catch (err) {
-      alert(err.message);
+      setError(err.message);
     }
   };
 
@@ -100,11 +114,19 @@ const ViewRestaurant = ({ handleLogout }) => {
         throw new Error("Failed to submit the review.");
       }
 
-      const data = await response.json();
-      // Append the new review to the restaurant state
+      const newReview = await response.json();
+
+      const updatedReviews = [...restaurant.reviews, newReview];
+
+      const newAverageRating =
+        updatedReviews.reduce((sum, review) => sum + review.rating, 0) /
+        updatedReviews.length;
+
+      // Update the restaurant state
       setRestaurant((prev) => ({
         ...prev,
-        reviews: [...prev.reviews, data],
+        reviews: updatedReviews,
+        averageRating: newAverageRating.toFixed(2), // Limit to 2 decimal places
       }));
 
       // Reset the review form
@@ -141,12 +163,22 @@ const ViewRestaurant = ({ handleLogout }) => {
       } else {
         updatedReview = { ...editingReview, rating: parseFloat(editRating), comment: editComment };
       }
-  
+      
+      // Update the specific review in the list
+      const updatedReviews = restaurant.reviews.map((review) =>
+        review.reviewID === editingReview.reviewID ? updatedReview : review
+      );
+
+      // Recalculate average rating
+      const newAverageRating =
+        updatedReviews.reduce((sum, review) => sum + review.rating, 0) /
+        updatedReviews.length;
+
+      // Update the restaurant state
       setRestaurant((prev) => ({
         ...prev,
-        reviews: prev.reviews.map((review) =>
-          review.reviewID === editingReview.reviewID ? updatedReview : review
-        ),
+        reviews: updatedReviews,
+        averageRating: newAverageRating.toFixed(2), // Limit to 2 decimal places
       }));
       setEditingReview(null); // Close the edit popup
     } catch (err) {
@@ -377,7 +409,7 @@ const ViewRestaurant = ({ handleLogout }) => {
           <div>
             {restaurant.reviews.map((review) => (
               <div key={review.reviewID} style={styles.review}>
-                <p><strong>[FullName]</strong></p>
+                <p><strong>{review.userName}</strong></p>
                 <p>Date: {review.reviewDate}</p>
                 <p>Rating: {review.rating}</p>
                 <p>{review.comment}</p>

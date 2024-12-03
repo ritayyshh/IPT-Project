@@ -6,6 +6,7 @@
         public string UserID { get; set; }
         public string Username { get; set; } = string.Empty;
         public int RestaurantID { get; set; }
+        public string RestaurantName { get; set; }
         public string ReservationDate { get; set; }
         public string StartTime { get; set; }
         public string EndTime { get; set; }
