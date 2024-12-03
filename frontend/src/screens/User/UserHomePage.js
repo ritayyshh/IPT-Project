@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import logo from "../../assets/logo.png"; // Adjust the path based on the location of your file
 
 const UserHomePage = ({ handleLogout, username }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -18,7 +19,7 @@ const UserHomePage = ({ handleLogout, username }) => {
           throw new Error("Failed to fetch user ID");
         }
         const data = await response.json();
-        setUserId(data.userId); // Set userId from the API response
+        setUserId(data.userId);
       } catch (err) {
         setError(err.message);
       }
@@ -65,8 +66,8 @@ const UserHomePage = ({ handleLogout, username }) => {
       cursor: "pointer",
     },
     logo: {
-      width: "40px",
-      height: "40px",
+      width: "100px",
+      height: "100px",
       borderRadius: "50%",
     },
     logoText: {
@@ -190,21 +191,16 @@ const UserHomePage = ({ handleLogout, username }) => {
       <div style={styles.sidebar}>
         <div style={styles.logoContainer} onClick={handleLogoClick}>
           <img
-            src="https://via.placeholder.com/40"
+            src={logo}
             alt="Logo"
             style={styles.logo}
           />
-          <div style={styles.logoText}>{isSidebarOpen && "MyApp"}</div>
+          <div style={styles.logoText}>{isSidebarOpen && "Restaurant Reservation"}</div>
         </div>
         <ul style={styles.sidebarLinks}>
           <li>
-            <a href="#settings" style={styles.sidebarLink}>
-              Settings
-            </a>
-          </li>
-          <li>
-            <a href="#feedback" style={styles.sidebarLink}>
-              Feedback
+            <a href="#profile" style={styles.sidebarLink}>
+              Profile
             </a>
           </li>
           <li>
@@ -220,7 +216,14 @@ const UserHomePage = ({ handleLogout, username }) => {
         {/* Top Navigation */}
         <nav style={styles.navBar}>
           <div style={styles.navLinks}>
-            <a href="#home" style={styles.navLink}>
+            <a
+              href="#home"
+              onClick={(e) => {
+                e.preventDefault(); // Prevent the default anchor behavior
+                navigate("/user-home"); // Navigate to the desired route
+              }}
+              style={styles.navLink}
+            >
               Home
             </a>
             <a href="#about" style={styles.navLink}>
@@ -228,9 +231,6 @@ const UserHomePage = ({ handleLogout, username }) => {
             </a>
             <a href="#contact" style={styles.navLink}>
               Contact Us
-            </a>
-            <a href="#reviews" style={styles.navLink}>
-              Reviews
             </a>
           </div>
           <button onClick={handleLogout} style={styles.logoutButton}>
@@ -241,11 +241,11 @@ const UserHomePage = ({ handleLogout, username }) => {
         {/* Page Content */}
         <div>
           <h1 style={styles.contentHeader}>
-            Welcome, {username} (UserID: {userId})
+            Welcome, [FullName]
           </h1>
           <p style={styles.contentText}>
-            Explore restaurants, provide feedback, and manage reservations using
-            the app.
+            Explore restaurants, provide reviews, and manage reservations using
+            the website.
           </p>
 
           {/* Restaurants List */}

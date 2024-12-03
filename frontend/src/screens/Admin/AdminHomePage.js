@@ -1,14 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 const AdminHomePage = ({ handleLogout }) => {
   const [restaurants, setRestaurants] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [selectedRestaurant, setSelectedRestaurant] = useState(null); // For editing
+  const [showModal, setShowModal] = useState(false);
 
-  const navigate = useNavigate(); // Initialize useNavigate hook
+  const navigate = useNavigate();
 
-  // Fetch restaurants data on component mount
   useEffect(() => {
     const fetchRestaurants = async () => {
       try {
@@ -29,7 +30,7 @@ const AdminHomePage = ({ handleLogout }) => {
   }, []);
 
   const handleAddRestaurant = () => {
-    navigate('/add-restaurant');
+    navigate("/add-restaurant");
   };
 
   const handleViewRestaurant = (id) => {
@@ -39,12 +40,11 @@ const AdminHomePage = ({ handleLogout }) => {
   const handleDeleteRestaurant = async (id) => {
     try {
       const response = await fetch(`http://localhost:5236/api/Restaurants/${id}`, {
-        method: 'DELETE',
+        method: "DELETE",
       });
       if (!response.ok) {
-        throw new Error('Failed to delete restaurant');
+        throw new Error("Failed to delete restaurant");
       }
-      // Update the state to remove the deleted restaurant
       setRestaurants((prevRestaurants) =>
         prevRestaurants.filter((restaurant) => restaurant.restaurantID !== id)
       );
@@ -53,135 +53,222 @@ const AdminHomePage = ({ handleLogout }) => {
     }
   };
 
-  // Styles for the components
+  const handleEditRestaurant = async (id) => {
+    try {
+      const response = await fetch(`http://localhost:5236/api/Restaurants/${id}`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch restaurant details");
+      }
+      const data = await response.json();
+      setSelectedRestaurant(data);
+      setShowModal(true);
+    } catch (err) {
+      alert(`Error fetching restaurant details: ${err.message}`);
+    }
+  };
+
+  const handleSaveChanges = async () => {
+    try {
+      const response = await fetch(
+        `http://localhost:5236/api/Restaurants/${selectedRestaurant.restaurantID}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(selectedRestaurant),
+        }
+      );
+      if (!response.ok) {
+        throw new Error("Failed to update restaurant details");
+      }
+      const updatedRestaurants = restaurants.map((restaurant) =>
+        restaurant.restaurantID === selectedRestaurant.restaurantID
+          ? selectedRestaurant
+          : restaurant
+      );
+      setRestaurants(updatedRestaurants);
+      setShowModal(false);
+    } catch (err) {
+      alert(`Error updating restaurant: ${err.message}`);
+    }
+  };
+
   const styles = {
     restaurantCard: {
-      backgroundColor: '#fff',
-      padding: '15px',
-      margin: '15px',
-      borderRadius: '8px',
-      boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)',
-      transition: 'transform 0.3s ease',
+      backgroundColor: "#fff",
+      padding: "15px",
+      margin: "15px",
+      borderRadius: "8px",
+      boxShadow: "0 2px 10px rgba(0, 0, 0, 0.1)",
+      transition: "transform 0.3s ease",
     },
     restaurantName: {
-      fontSize: '20px',
-      fontWeight: 'bold',
-      color: '#333',
+      fontSize: "20px",
+      fontWeight: "bold",
+      color: "#333",
     },
     restaurantLocation: {
-      color: '#777',
-      marginTop: '5px',
+      color: "#777",
+      marginTop: "5px",
     },
     rating: {
-      marginTop: '5px',
-      fontSize: '16px',
-      color: '#f39c12',
+      marginTop: "5px",
+      fontSize: "16px",
+      color: "#f39c12",
     },
-    viewButton: {
-      backgroundColor: '#3498db',
-      color: '#fff',
-      border: 'none',
-      padding: '10px 15px',
-      borderRadius: '5px',
-      marginTop: '15px',
-      cursor: 'pointer',
-      fontWeight: 'bold',
+    button: {
+      padding: "10px 15px",
+      borderRadius: "5px",
+      margin: "5px",
+      cursor: "pointer",
+      fontWeight: "bold",
     },
-    deleteButton: {
-      backgroundColor: '#e74c3c',
-      color: '#fff',
-      border: 'none',
-      padding: '10px 15px',
-      borderRadius: '5px',
-      marginTop: '10px',
-      cursor: 'pointer',
-      fontWeight: 'bold',
+    modal: {
+      position: "fixed",
+      top: "50%",
+      left: "50%",
+      transform: "translate(-50%, -50%)",
+      backgroundColor: "#f9f9f9",
+      padding: "30px",
+      borderRadius: "12px",
+      boxShadow: "0 4px 20px rgba(0, 0, 0, 0.2)",
+      width: "90%",
+      maxWidth: "400px",
+      zIndex: 1000,
     },
-    container: {
-      display: 'flex',
-      flexWrap: 'wrap',
-      justifyContent: 'center',
-      padding: '20px',
+    overlay: {
+      position: "fixed",
+      top: 0,
+      left: 0,
+      width: "100%",
+      height: "100%",
+      backgroundColor: "rgba(0, 0, 0, 0.5)",
+      zIndex: 999,
     },
-    loading: {
-      fontSize: '20px',
-      color: '#3498db',
+    input: {
+      width: "100%",
+      padding: "10px",
+      marginBottom: "15px",
+      border: "1px solid #ddd",
+      borderRadius: "8px",
     },
-    error: {
-      color: '#e74c3c',
-      fontSize: '16px',
+    saveButton: {
+      padding: "10px 15px",
+      backgroundColor: "#4CAF50",
+      color: "#fff",
+      border: "none",
+      borderRadius: "5px",
+      fontWeight: "bold",
+      cursor: "pointer",
+      marginRight: "10px",
+    },
+    cancelButton: {
+      padding: "10px 15px",
+      backgroundColor: "#e74c3c",
+      color: "#fff",
+      border: "none",
+      borderRadius: "5px",
+      fontWeight: "bold",
+      cursor: "pointer",
     },
   };
 
   return (
-    <div style={{ padding: '20px', textAlign: 'center' }}>
+    <div style={{ padding: "20px", textAlign: "center" }}>
       <h1>Welcome, Admin!</h1>
-
-      <div style={{ marginTop: '20px' }}>
-        <button
-          onClick={handleLogout}
-          style={{
-            padding: '10px 20px',
-            margin: '10px',
-            backgroundColor: '#ff4d4d',
-            color: 'white',
-            border: 'none',
-            borderRadius: '5px',
-            cursor: 'pointer',
-          }}
-        >
+      <div style={{ marginTop: "20px" }}>
+        <button onClick={handleLogout} style={{ ...styles.button, backgroundColor: "#ff4d4d" }}>
           Logout
         </button>
-        <button
-          onClick={handleAddRestaurant}
-          style={{
-            padding: '10px 20px',
-            margin: '10px',
-            backgroundColor: '#4CAF50',
-            color: 'white',
-            border: 'none',
-            borderRadius: '5px',
-            cursor: 'pointer',
-          }}
-        >
+        <button onClick={handleAddRestaurant} style={{ ...styles.button, backgroundColor: "#4CAF50" }}>
           Add Restaurant
         </button>
       </div>
 
-      {/* Restaurant List Section */}
-      <div style={styles.container}>
-        {isLoading && <p style={styles.loading}>Loading restaurants...</p>}
-        {error && <p style={styles.error}>Error: {error}</p>}
-        {!isLoading && !error && restaurants.length === 0 && (
-          <p>No restaurants found.</p>
-        )}
+      <div>
+        {isLoading && <p>Loading restaurants...</p>}
+        {error && <p style={{ color: "red" }}>{error}</p>}
         {!isLoading &&
           !error &&
-          restaurants.length > 0 &&
           restaurants.map((restaurant) => (
             <div key={restaurant.restaurantID} style={styles.restaurantCard}>
               <div style={styles.restaurantName}>{restaurant.name}</div>
-              <div style={styles.restaurantLocation}>
-                Location: {restaurant.location}
-              </div>
+              <div style={styles.restaurantLocation}>Location: {restaurant.location}</div>
               <div style={styles.rating}>
-                Average Rating: {restaurant.averageRating || 'N/A'}
+                Average Rating: {restaurant.averageRating || "N/A"}
               </div>
               <button
-                style={styles.viewButton}
                 onClick={() => handleViewRestaurant(restaurant.restaurantID)}
+                style={{ ...styles.button, backgroundColor: "#3498db" }}
               >
-                View Restaurant
+                View
               </button>
               <button
-                style={styles.deleteButton}
+                onClick={() => handleEditRestaurant(restaurant.restaurantID)}
+                style={{ ...styles.button, backgroundColor: "#f39c12" }}
+              >
+                Edit
+              </button>
+              <button
                 onClick={() => handleDeleteRestaurant(restaurant.restaurantID)}
+                style={{ ...styles.button, backgroundColor: "#e74c3c" }}
               >
                 Delete
               </button>
             </div>
           ))}
       </div>
+
+      {showModal && (
+        <>
+          <div style={styles.overlay} onClick={() => setShowModal(false)} />
+          <div style={styles.modal}>
+            <h3>Edit Restaurant</h3>
+            <input
+              type="text"
+              placeholder="Name"
+              value={selectedRestaurant.name}
+              onChange={(e) =>
+                setSelectedRestaurant({ ...selectedRestaurant, name: e.target.value })
+              }
+              style={styles.input}
+            />
+            <input
+              type="text"
+              placeholder="Location"
+              value={selectedRestaurant.location}
+              onChange={(e) =>
+                setSelectedRestaurant({ ...selectedRestaurant, location: e.target.value })
+              }
+              style={styles.input}
+            />
+            <textarea
+              placeholder="Description"
+              value={selectedRestaurant.description}
+              onChange={(e) =>
+                setSelectedRestaurant({ ...selectedRestaurant, description: e.target.value })
+              }
+              style={styles.input}
+            />
+            <input
+              type="text"
+              placeholder="Contact Number"
+              value={selectedRestaurant.contactNumber}
+              onChange={(e) =>
+                setSelectedRestaurant({ ...selectedRestaurant, contactNumber: e.target.value })
+              }
+              style={styles.input}
+            />
+            <button onClick={handleSaveChanges} style={styles.saveButton}>
+              Save
+            </button>
+            <button onClick={() => setShowModal(false)} style={styles.cancelButton}>
+              Cancel
+            </button>
+          </div>
+        </>
+      )}
     </div>
   );
 };

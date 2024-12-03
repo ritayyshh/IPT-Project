@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 
-const ViewRestaurant = () => {
+const ViewRestaurant = ({ handleLogout }) => {
   const { restaurantID } = useParams();
   const [restaurant, setRestaurant] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -158,17 +158,46 @@ const ViewRestaurant = () => {
 
   const styles = {
     container: {
-      fontFamily: "Arial, sans-serif",
-      padding: "20px",
-      backgroundColor: "#f5f5f5",
-      minHeight: "100vh",
-    },
-    headerContainer: {
       display: "flex",
-      justifyContent: "center",
+      flexDirection: "column", // Stack navbar and main content vertically
+      minHeight: "100vh",
+      fontFamily: "Arial, sans-serif",
+      backgroundColor: "#f5f5f5",
+    },
+    navBar: {
+      display: "flex",
+      justifyContent: "space-between",
       alignItems: "center",
-      marginBottom: "20px",
-      position: "relative",
+      backgroundColor: "#007BFF",
+      padding: "10px 20px",
+      color: "white",
+      boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+      position: "sticky", // Makes navbar stick to the top
+      top: 0, // Ensures it stays at the top
+      zIndex: 1000, // Keeps it above other elements
+    },
+    navLinks: {
+      display: "flex",
+      gap: "20px",
+    },
+    navLink: {
+      color: "white",
+      textDecoration: "none",
+      fontWeight: "bold",
+      fontSize: "16px",
+    },
+    logoutButton: {
+      backgroundColor: "#ff4d4d",
+      border: "none",
+      color: "white",
+      padding: "8px 16px",
+      borderRadius: "5px",
+      cursor: "pointer",
+      fontSize: "16px",
+    },
+    mainContent: {
+      flex: 1,
+      padding: "20px",
     },
     header: {
       fontSize: "24px",
@@ -177,9 +206,9 @@ const ViewRestaurant = () => {
       color: "#333",
     },
     reserveButton: {
-      position: "absolute",
-      top: 0,
-      right: 0,
+      position: "absolute", // Make it absolutely positioned
+      top: "80px", // Add some spacing from the top of its container
+      right: "10px", // Position it 10px away from the right edge
       padding: "10px 15px",
       backgroundColor: "#28a745",
       color: "white",
@@ -296,11 +325,30 @@ const ViewRestaurant = () => {
 
   return (
     <div style={styles.container}>
-      <div style={styles.headerContainer}>
+      {/* Navbar */}
+      <nav style={styles.navBar}>
+        <div style={styles.navLinks}>
+          <a
+            href="#home"
+            onClick={(e) => {
+              e.preventDefault(); // Prevent the default anchor behavior
+              navigate("/user-home"); // Navigate to the desired route
+            }}
+            style={styles.navLink}
+          >
+            Home
+          </a>
+          <a href="#about" style={styles.navLink}>About Us</a>
+          <a href="#contact" style={styles.navLink}>Contact Us</a>
+        </div>
+        <button onClick={handleLogout} style={styles.logoutButton}>Logout</button>
+      </nav>
+
+      
+      <div style={styles.mainContent}>
         <h1 style={styles.header}>{restaurant.name}</h1>
         <button
           style={styles.reserveButton}
-          // onClick={() => navigate(`/ViewRestaurantTables/${restaurantID}`)}
           onClick={() => navigate(`/ViewRestaurantTables/${restaurantID}?username=${username}&userId=${userId}`)}
         >
           I want to Reserve
@@ -329,9 +377,8 @@ const ViewRestaurant = () => {
           <div>
             {restaurant.reviews.map((review) => (
               <div key={review.reviewID} style={styles.review}>
-                <p>
-                  <strong>{review.userName}</strong> ({review.reviewDate})
-                </p>
+                <p><strong>[FullName]</strong></p>
+                <p>Date: {review.reviewDate}</p>
                 <p>Rating: {review.rating}</p>
                 <p>{review.comment}</p>
                 {review.userName === username && (

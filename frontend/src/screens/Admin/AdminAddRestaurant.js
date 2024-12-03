@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 
-const AddRestaurant = () => {
+const AddRestaurant = ({ handleLogout }) => {
   const [restaurantData, setRestaurantData] = useState({
     name: '',
     location: '',
@@ -33,9 +33,20 @@ const AddRestaurant = () => {
       console.error("Error:", error);
     }
   };
-
+  const styles = {
+    button: {
+      padding: "10px 15px",
+      borderRadius: "5px",
+      margin: "5px",
+      cursor: "pointer",
+      fontWeight: "bold",
+    },
+  };
   return (
     <div style={{ padding: '20px', textAlign: 'center' }}>
+      <button onClick={handleLogout} style={{ ...styles.button, backgroundColor: "#ff4d4d" }}>
+        Logout
+      </button>
       <h1>Add a New Restaurant</h1>
       <form onSubmit={handleSubmit}>
         <div>

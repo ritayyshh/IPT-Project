@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 
-const AdminViewRestaurant = () => {
+const AdminViewRestaurant = ({ handleLogout }) => {
   const [reservationDetails, setReservationDetails] = useState(null);
   const [showPopup, setShowPopup] = useState(false);
 
@@ -43,10 +43,13 @@ const AdminViewRestaurant = () => {
       <div style={popupStyles.overlay}>
         <div style={popupStyles.popup}>
           <h3>Reservation Details</h3>
-          <p><strong>Reservation ID:</strong> {reservationDetails?.tableReservationID}</p>
-          <p><strong>Table ID:</strong> {reservationDetails?.tableID}</p>
-          <p><strong>Restaurant ID:</strong> {reservationDetails?.restaurantID}</p>
-          <p><strong>Username:</strong> {reservationDetails?.username}</p>
+          {/* <p><strong>Reservation ID:</strong> {reservationDetails?.tableReservationID}</p> */}
+          <p><strong>Table Number:</strong> {reservationDetails?.tableID}</p>
+          <p><strong>[Restaurant Name:]</strong></p>
+          <p><strong>[FullName]</strong></p>
+          
+          {/* <p><strong>Restaurant ID:</strong> {reservationDetails?.restaurantID}</p> */}
+          {/* <p><strong>Username:</strong> {reservationDetails?.username}</p> */}
           <p><strong>Reservation Date:</strong> {reservationDetails?.reservationDate}</p>
           <p><strong>Start Time:</strong> {reservationDetails?.startTime}</p>
           <p><strong>End Time:</strong> {reservationDetails?.endTime}</p>
@@ -543,6 +546,13 @@ const AdminViewRestaurant = () => {
       justifyContent: "space-between",
       alignItems: "center",
     },
+    LogoutButton: {
+      padding: "10px 15px",
+      borderRadius: "5px",
+      margin: "5px",
+      cursor: "pointer",
+      fontWeight: "bold",
+    },
   };
 
   if (isLoading) {
@@ -555,6 +565,9 @@ const AdminViewRestaurant = () => {
 
   return (
     <div style={styles.container}>
+      <button onClick={handleLogout} style={{ ...styles.LogoutButton, backgroundColor: "#ff4d4d" }}>
+        Logout
+      </button>
       <div style={styles.headerContainer}>
         <h1 style={styles.header}>{restaurant?.name || "Restaurant Details"}</h1>
       </div>
@@ -790,7 +803,7 @@ const AdminViewRestaurant = () => {
           tables.map((table) => (
             <div key={table.tableID} style={styles.tableCard}>
               <div>
-                <p style={styles.detailText}>Table ID: {table.tableID}</p>
+                <p style={styles.detailText}>Table Number: {table.tableID}</p>
                 <p style={styles.detailText}>
                   Seating Capacity: {table.seatingCapacity}
                 </p>
@@ -834,7 +847,7 @@ const AdminViewRestaurant = () => {
                             <h2>Order Details</h2>
                             {ViewOrderDetails.map((order) => (
                               <div key={order.orderID}>
-                                <p><strong>Order ID:</strong> {order.orderID}</p>
+                                <p><strong>Order Number:</strong> {order.orderID}</p>
                                 <p><strong>Restaurant:</strong> {order.restaurantName}</p>
                                 <p><strong>Order Date:</strong> {new Date(order.orderDate).toLocaleString()}</p>
                                 <p><strong>Total Amount:</strong> PKR {order.totalAmount}</p>
@@ -1003,7 +1016,8 @@ const AdminViewRestaurant = () => {
           restaurant.reviews.map((review) => (
             <div key={review.reviewID} style={styles.reviewCard}>
               <p style={styles.reviewText}>
-                <strong>User:</strong> {review.userName}
+                {/* <strong>User:</strong> {review.userName} */}
+                <strong>User:</strong> [FullName]
               </p>
               <p style={styles.reviewText}>
                 <strong>Rating:</strong> {review.rating}

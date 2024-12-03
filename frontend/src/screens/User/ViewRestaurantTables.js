@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
 
-const ViewRestaurantTables = () => {
+const ViewRestaurantTables = ({ handleLogout }) => {
   const navigate = useNavigate();
   const today = new Date().toISOString().split("T")[0];
   const { restaurantID } = useParams();
@@ -268,10 +268,46 @@ const ViewRestaurantTables = () => {
 
   const styles = {
     container: {
-      fontFamily: "Arial, sans-serif",
-      padding: "20px",
-      backgroundColor: "#f5f5f5",
+      display: "flex",
+      flexDirection: "column", // Stack navbar and main content vertically
       minHeight: "100vh",
+      fontFamily: "Arial, sans-serif",
+      backgroundColor: "#f5f5f5",
+    },
+    navBar: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      backgroundColor: "#007BFF",
+      padding: "10px 20px",
+      color: "white",
+      boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+      position: "sticky", // Makes navbar stick to the top
+      top: 0, // Ensures it stays at the top
+      zIndex: 1000, // Keeps it above other elements
+    },
+    navLinks: {
+      display: "flex",
+      gap: "20px",
+    },
+    navLink: {
+      color: "white",
+      textDecoration: "none",
+      fontWeight: "bold",
+      fontSize: "16px",
+    },
+    logoutButton: {
+      backgroundColor: "#ff4d4d",
+      border: "none",
+      color: "white",
+      padding: "8px 16px",
+      borderRadius: "5px",
+      cursor: "pointer",
+      fontSize: "16px",
+    },
+    mainContent: {
+      flex: 1,
+      padding: "20px",
     },
     header: {
       fontSize: "24px",
@@ -367,123 +403,145 @@ const ViewRestaurantTables = () => {
 
   return (
     <div style={styles.container}>
-      <h1 style={styles.header}>Available Tables</h1>
-      {tables.length > 0 ? (
-        tables.map((table) => (
-          <div key={table.tableID} style={styles.tableCard}>
-            <div>
-              <p style={styles.tableDetails}>Table ID: {table.tableID}</p>
-              <p style={styles.tableDetails}>
-                Seating Capacity: {table.seatingCapacity}
-              </p>
+      {/* Navbar */}
+      <nav style={styles.navBar}>
+        <div style={styles.navLinks}>
+          <a
+            href="#home"
+            onClick={(e) => {
+              e.preventDefault(); // Prevent the default anchor behavior
+              navigate("/user-home"); // Navigate to the desired route
+            }}
+            style={styles.navLink}
+          >
+            Home
+          </a>
+          <a href="#about" style={styles.navLink}>About Us</a>
+          <a href="#contact" style={styles.navLink}>Contact Us</a>
+        </div>
+        <button onClick={handleLogout} style={styles.logoutButton}>Logout</button>
+      </nav>
+
+      {/* Main Content */}
+      <div style={styles.mainContent}>
+        <h1 style={styles.header}>Available Tables</h1>
+        {tables.length > 0 ? (
+          tables.map((table) => (
+            <div key={table.tableID} style={styles.tableCard}>
+              <div>
+                <p style={styles.tableDetails}>Table Number: {table.tableID}</p>
+                <p style={styles.tableDetails}>
+                  Seating Capacity: {table.seatingCapacity}
+                </p>
+              </div>
+              <button
+                style={styles.reserveButton}
+                onClick={() => handleReserve(table)}
+              >
+                Reserve
+              </button>
             </div>
+          ))
+        ) : (
+          <p style={styles.tableDetails}>No tables available.</p>
+        )}
+
+        {selectedTable && (
+          <div style={styles.formContainer}>
+            <h3>Reserve Table {selectedTable.tableID}</h3>
+            <label>Date:</label>
+            <input
+              type="date"
+              name="reservationDate"
+              style={styles.formInput}
+              value={reservationDetails.reservationDate}
+              onChange={handleChange}
+              min={today} // Set the minimum date to today
+            />
+            <label>Start Time:</label>
+            <input
+              type="time"
+              name="startTime"
+              style={styles.formInput}
+              value={reservationDetails.startTime}
+              onChange={handleChange}
+            />
+            <label>End Time:</label>
+            <input
+              type="time"
+              name="endTime"
+              style={styles.formInput}
+              value={reservationDetails.endTime}
+              onChange={handleChange}
+            />
+            <label>Party Size:</label>
+            <input
+              type="number"
+              name="partySize"
+              style={styles.formInput}
+              value={reservationDetails.partySize || ""}
+              onChange={handleChange}
+              min="1"
+            />
+            <label>Special Requests:</label>
+            <textarea
+              name="specialRequests"
+              style={styles.formInput}
+              value={reservationDetails.specialRequests}
+              onChange={handleChange}
+            />
             <button
-              style={styles.reserveButton}
-              onClick={() => handleReserve(table)}
+              style={{
+                ...styles.submitButton,
+                opacity: isSubmitting ? 0.6 : 1,
+                cursor: isSubmitting ? "not-allowed" : "pointer",
+              }}
+              onClick={handleSubmitReservation}
+              disabled={isSubmitting}
             >
-              Reserve
+              {isSubmitting ? "Submitting..." : "Submit Reservation"}
             </button>
           </div>
-        ))
-      ) : (
-        <p style={styles.tableDetails}>No tables available.</p>
-      )}
+        )}
 
-      {selectedTable && (
-        <div style={styles.formContainer}>
-          <h3>Reserve Table {selectedTable.tableID}</h3>
-          <label>Date:</label>
-          <input
-            type="date"
-            name="reservationDate"
-            style={styles.formInput}
-            value={reservationDetails.reservationDate}
-            onChange={handleChange}
-            min={today} // Set the minimum date to today
-          />
-          <label>Start Time:</label>
-          <input
-            type="time"
-            name="startTime"
-            style={styles.formInput}
-            value={reservationDetails.startTime}
-            onChange={handleChange}
-          />
-          <label>End Time:</label>
-          <input
-            type="time"
-            name="endTime"
-            style={styles.formInput}
-            value={reservationDetails.endTime}
-            onChange={handleChange}
-          />
-          <label>Party Size:</label>
-          <input
-            type="number"
-            name="partySize"
-            style={styles.formInput}
-            value={reservationDetails.partySize || ""}
-            onChange={handleChange}
-            min="1"
-          />
-          <label>Special Requests:</label>
-          <textarea
-            name="specialRequests"
-            style={styles.formInput}
-            value={reservationDetails.specialRequests}
-            onChange={handleChange}
-          />
-          <button
-            style={{
-              ...styles.submitButton,
-              opacity: isSubmitting ? 0.6 : 1,
-              cursor: isSubmitting ? "not-allowed" : "pointer",
-            }}
-            onClick={handleSubmitReservation}
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? "Submitting..." : "Submit Reservation"}
-          </button>
-        </div>
-      )}
-
-      {selectedTable && showOrderForm && restaurantData && (
-        <div style={styles.orderForm}>
-          <h3>Order Menu For Table {selectedTable.tableID} </h3>
-          {restaurantData.menuItems.map((item) => (
-            <div key={item.menuItemID} style={styles.menuItemCard}>
-              <div>
-                <p style={styles.menuItemDetails}>
-                  <strong>{item.name}</strong>
-                </p>
-                <p style={styles.menuItemDetails}>{item.description}</p>
-                <p style={styles.menuItemDetails}>PKR {item.price}</p>
+        {selectedTable && showOrderForm && restaurantData && (
+          <div style={styles.orderForm}>
+            <h3>Order Menu for Table {selectedTable.tableID} </h3>
+            {restaurantData.menuItems.map((item) => (
+              <div key={item.menuItemID} style={styles.menuItemCard}>
+                <div>
+                  <p style={styles.menuItemDetails}>
+                    <strong>{item.name}</strong>
+                  </p>
+                  <p style={styles.menuItemDetails}>{item.description}</p>
+                  <p style={styles.menuItemDetails}>PKR {item.price}</p>
+                </div>
+                <div>
+                  <button
+                    style={styles.quantityButton}
+                    onClick={() => handleQuantityChange(item.menuItemID, "decrement")}
+                  >
+                    -
+                  </button>
+                  <span style={{ margin: "0 10px" }}>
+                    {orderItems[item.menuItemID] || 0}
+                  </span>
+                  <button
+                    style={styles.quantityButton}
+                    onClick={() => handleQuantityChange(item.menuItemID, "increment")}
+                  >
+                    +
+                  </button>
+                </div>
               </div>
-              <div>
-                <button
-                  style={styles.quantityButton}
-                  onClick={() => handleQuantityChange(item.menuItemID, "decrement")}
-                >
-                  -
-                </button>
-                <span style={{ margin: "0 10px" }}>
-                  {orderItems[item.menuItemID] || 0}
-                </span>
-                <button
-                  style={styles.quantityButton}
-                  onClick={() => handleQuantityChange(item.menuItemID, "increment")}
-                >
-                  +
-                </button>
-              </div>
-            </div>
-          ))}
-          <button style={styles.submitButton} onClick={handleSubmitOrder}>
-            Submit Order
-          </button>
+            ))}
+            <button style={styles.submitButton} onClick={handleSubmitOrder}>
+              Submit Order
+            </button>
+          </div>
+        )}
         </div>
-      )}
-    </div>
+      </div>
   );
 };
 
