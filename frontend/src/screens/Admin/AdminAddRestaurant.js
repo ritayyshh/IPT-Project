@@ -27,73 +27,122 @@ const AddRestaurant = ({ handleLogout }) => {
         }
       });
       setResponseMessage("Restaurant added successfully!");
-      console.log(response.data); // Log the response from the API
+      setRestaurantData({ name: '', location: '', description: '', contactNumber: '' }); // Reset form
     } catch (error) {
       setResponseMessage("Failed to add restaurant.");
-      console.error("Error:", error);
     }
   };
+
   const styles = {
-    button: {
-      padding: "10px 15px",
-      borderRadius: "5px",
-      margin: "5px",
-      cursor: "pointer",
-      fontWeight: "bold",
+    container: {
+      padding: '20px',
+      textAlign: 'center',
+      fontFamily: 'Arial, sans-serif',
+      maxWidth: '500px',
+      margin: 'auto',
+      boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
+      borderRadius: '10px',
+      backgroundColor: '#f9f9f9'
     },
+    header: {
+      color: '#333',
+      marginBottom: '20px'
+    },
+    form: {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '15px'
+    },
+    label: {
+      textAlign: 'left',
+      fontWeight: 'bold',
+      color: '#555'
+    },
+    input: {
+      padding: '10px',
+      borderRadius: '5px',
+      border: '1px solid #ccc',
+      fontSize: '16px',
+      width: '100%'
+    },
+    button: {
+      padding: '10px 20px',
+      borderRadius: '5px',
+      border: 'none',
+      fontSize: '16px',
+      fontWeight: 'bold',
+      cursor: 'pointer',
+      backgroundColor: '#4CAF50',
+      color: 'white'
+    },
+    logoutButton: {
+      backgroundColor: '#ff4d4d',
+      color: 'white',
+      marginBottom: '20px'
+    },
+    message: {
+      marginTop: '20px',
+      fontSize: '16px',
+      color: '#007BFF'
+    }
   };
+
   return (
-    <div style={{ padding: '20px', textAlign: 'center' }}>
-      <button onClick={handleLogout} style={{ ...styles.button, backgroundColor: "#ff4d4d" }}>
+    <div style={styles.container}>
+      <button onClick={handleLogout} style={{ ...styles.button, ...styles.logoutButton }}>
         Logout
       </button>
-      <h1>Add a New Restaurant</h1>
-      <form onSubmit={handleSubmit}>
+      <h1 style={styles.header}>Add a New Restaurant</h1>
+      <form onSubmit={handleSubmit} style={styles.form}>
         <div>
-          <label>Name: </label>
+          <label style={styles.label}>Name</label>
           <input
             type="text"
             name="name"
             value={restaurantData.name}
             onChange={handleChange}
+            style={styles.input}
             required
           />
         </div>
         <div>
-          <label>Location: </label>
+          <label style={styles.label}>Location</label>
           <input
             type="text"
             name="location"
             value={restaurantData.location}
             onChange={handleChange}
+            style={styles.input}
             required
           />
         </div>
         <div>
-          <label>Description: </label>
+          <label style={styles.label}>Description</label>
           <input
             type="text"
             name="description"
             value={restaurantData.description}
             onChange={handleChange}
+            style={styles.input}
             required
           />
         </div>
         <div>
-          <label>Contact Number: </label>
+          <label style={styles.label}>Contact Number</label>
           <input
             type="text"
             name="contactNumber"
             value={restaurantData.contactNumber}
             onChange={handleChange}
+            style={styles.input}
             required
           />
         </div>
-        <button type="submit" style={{ padding: '10px 20px', marginTop: '20px' }}>
+        <button type="submit" style={styles.button}>
           Add Restaurant
         </button>
       </form>
-      <p>{responseMessage}</p>
+      {responseMessage && <p style={styles.message}>{responseMessage}</p>}
     </div>
   );
 };
