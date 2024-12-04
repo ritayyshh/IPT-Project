@@ -9,5 +9,6 @@
 
         public Restaurant? Restaurant { get; set; }
         public ICollection<TableReservation>? TableReservations { get; set; }
+        public ICollection<Waitlist> Waitlist { get; set; }
     }
 }

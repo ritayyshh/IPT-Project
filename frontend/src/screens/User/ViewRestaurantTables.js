@@ -33,17 +33,43 @@ const ViewRestaurantTables = ({ handleLogout }) => {
         `http://localhost:5236/api/Tables/Restaurant/${restaurantID}`
       );
       const data = await response.json();
+      // if (data.length > 0) {
+      //   const availableTables = data.filter((table) => table.isAvailable);
+      //   setTables(availableTables);
+      // }
+
       if (data.length > 0) {
-        const availableTables = data.filter((table) => table.isAvailable);
-        setTables(availableTables);
-      }
+        // console.log(userId);
+        fetch(`http://localhost:5236/api/TableReservations/byUser/${userId}`)
+            .then((response) => response.json())
+            .then((reservations) => {
+                // Check if the response is an array
+                if (Array.isArray(reservations)) {
+                    const reservedTableIds = reservations.map((reservation) => reservation.tableID);
+                    const availableTables = data.filter((table) => 
+                        !reservedTableIds.includes(table.tableID)
+                    );
+                    setTables(availableTables);
+                } else {
+                    // console.error("Reservations response is not an array:", reservations);
+                    setTables(data); // Show all tables if response is not as expected
+                }
+            })
+            .catch((error) => {
+                console.error('Error fetching table reservations:', error);
+                setTables(data); // Show all tables in case of an error
+            });
+    }
+    
+        
+
     } catch (err) {
       console.error("Error fetching tables:", err);
       setError("Failed to fetch tables.");
     } finally {
       setIsLoading(false);
     }
-  }, [restaurantID]);
+  }, [restaurantID, userId]);
 
   const fetchRestaurantDetails = useCallback(async () => {
     try {
@@ -343,6 +369,15 @@ const ViewRestaurantTables = ({ handleLogout }) => {
       cursor: "pointer",
       fontSize: "14px",
     },
+    JoinWaitListButton: {
+      padding: "10px 15px",
+      backgroundColor: "green",
+      color: "white",
+      border: "none",
+      borderRadius: "5px",
+      cursor: "pointer",
+      fontSize: "14px",
+    },
     formContainer: {
       marginTop: "15px",
       backgroundColor: "#fff",
@@ -438,12 +473,25 @@ const ViewRestaurantTables = ({ handleLogout }) => {
                   Seating Capacity: {table.seatingCapacity}
                 </p>
               </div>
-              <button
-                style={styles.reserveButton}
-                onClick={() => handleReserve(table)}
-              >
-                Reserve
-              </button>
+              {table.isAvailable ? (
+                <button
+                  style={styles.reserveButton}
+                  onClick={() => handleReserve(table)}
+                >
+                  Reserve
+                </button>
+              ) : (
+                {checkWaitlistStatus(table.tableID) ? (
+                  <p>Already Joined</p>
+                ) : (
+                  <button
+                      style={styles.JoinWaitListButton}
+                      onClick={() => handleJoinWaitList(table)}
+                  >
+                      Join Wait List
+                  </button>
+                )}
+              )}
             </div>
           ))
         ) : (

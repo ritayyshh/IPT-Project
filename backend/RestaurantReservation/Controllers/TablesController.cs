@@ -149,7 +149,8 @@ namespace RestaurantReservation.Controllers
                 {
                     TableID = t.TableID,
                     SeatingCapacity = t.SeatingCapacity,
-                    IsAvailable = t.IsAvailable
+                    IsAvailable = t.IsAvailable,
+                    Waitlist = t.Waitlist // Include the original Waitlist collection directly
                 })
                 .ToListAsync();
 
@@ -160,8 +161,6 @@ namespace RestaurantReservation.Controllers
 
             return Ok(tables);
         }
-
-
         private bool TableExists(int id)
         {
             return _context.Tables.Any(e => e.TableID == id);

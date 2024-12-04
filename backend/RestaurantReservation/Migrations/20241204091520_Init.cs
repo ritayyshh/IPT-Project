@@ -281,34 +281,6 @@ namespace RestaurantReservation.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Waitlists",
-                columns: table => new
-                {
-                    WaitlistID = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    RestaurantID = table.Column<int>(type: "int", nullable: false),
-                    UserID = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    JoinTime = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    PartySize = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Waitlists", x => x.WaitlistID);
-                    table.ForeignKey(
-                        name: "FK_Waitlists_AspNetUsers_UserID",
-                        column: x => x.UserID,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Waitlists_Restaurants_RestaurantID",
-                        column: x => x.RestaurantID,
-                        principalTable: "Restaurants",
-                        principalColumn: "RestaurantID",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "OrderItems",
                 columns: table => new
                 {
@@ -369,13 +341,64 @@ namespace RestaurantReservation.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "Waitlists",
+                columns: table => new
+                {
+                    WaitlistID = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    RestaurantID = table.Column<int>(type: "int", nullable: false),
+                    TableID = table.Column<int>(type: "int", nullable: false),
+                    UserID = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    AppUserId = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    RestaurantID1 = table.Column<int>(type: "int", nullable: true),
+                    TableID1 = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Waitlists", x => x.WaitlistID);
+                    table.ForeignKey(
+                        name: "FK_Waitlists_AspNetUsers_AppUserId",
+                        column: x => x.AppUserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Waitlists_AspNetUsers_UserID",
+                        column: x => x.UserID,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Waitlists_Restaurants_RestaurantID",
+                        column: x => x.RestaurantID,
+                        principalTable: "Restaurants",
+                        principalColumn: "RestaurantID",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Waitlists_Restaurants_RestaurantID1",
+                        column: x => x.RestaurantID1,
+                        principalTable: "Restaurants",
+                        principalColumn: "RestaurantID");
+                    table.ForeignKey(
+                        name: "FK_Waitlists_Tables_TableID",
+                        column: x => x.TableID,
+                        principalTable: "Tables",
+                        principalColumn: "TableID",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Waitlists_Tables_TableID1",
+                        column: x => x.TableID1,
+                        principalTable: "Tables",
+                        principalColumn: "TableID");
+                });
+
             migrationBuilder.InsertData(
                 table: "AspNetRoles",
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
                 values: new object[,]
                 {
-                    { "125494f1-426a-4b1e-aab3-16dfd15f9e33", null, "Admin", "ADMIN" },
-                    { "5c05871e-1e51-4711-b098-b7e47e61b267", null, "User", "USER" }
+                    { "169770d1-081c-45a9-b280-b54dee20c564", null, "User", "USER" },
+                    { "2d1aabb1-1133-4c1a-a025-d41487b947ea", null, "Admin", "ADMIN" }
                 });
 
             migrationBuilder.CreateIndex(
@@ -468,9 +491,29 @@ namespace RestaurantReservation.Migrations
                 column: "RestaurantID");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Waitlists_AppUserId",
+                table: "Waitlists",
+                column: "AppUserId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Waitlists_RestaurantID",
                 table: "Waitlists",
                 column: "RestaurantID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Waitlists_RestaurantID1",
+                table: "Waitlists",
+                column: "RestaurantID1");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Waitlists_TableID",
+                table: "Waitlists",
+                column: "TableID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Waitlists_TableID1",
+                table: "Waitlists",
+                column: "TableID1");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Waitlists_UserID",

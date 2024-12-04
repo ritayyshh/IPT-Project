@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using RestaurantReservation.Data;
 using RestaurantReservation.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace RestaurantReservation.Controllers
 {
@@ -16,83 +16,71 @@ namespace RestaurantReservation.Controllers
             _context = context;
         }
 
-        // GET: api/Waitlists
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<Waitlist>>> GetWaitlists()
+        // Check if the table exists in the restaurant
+        private bool TableExists(int tableId, int restaurantId)
         {
-            return await _context.Waitlists.ToListAsync();
-        }
-
-        // GET: api/Waitlists/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Waitlist>> GetWaitlist(int id)
-        {
-            var waitlist = await _context.Waitlists.FindAsync(id);
-
-            if (waitlist == null)
-            {
-                return NotFound();
-            }
-
-            return waitlist;
-        }
-
-        // PUT: api/Waitlists/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutWaitlist(int id, Waitlist waitlist)
-        {
-            if (id != waitlist.WaitlistID)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(waitlist).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!WaitlistExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
+            return _context.Tables.Any(e => e.TableID == tableId && e.RestaurantID == restaurantId); // Assuming you have a Tables table with RestaurantID
         }
 
         // POST: api/Waitlists
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Waitlist>> PostWaitlist(Waitlist waitlist)
+        public async Task<ActionResult<Waitlist>> PostWaitlist([FromBody] WaitListCreateDTO waitlistDTO)
         {
+            // Validate if the table exists for the specified restaurant
+            if (!TableExists(waitlistDTO.TableID, waitlistDTO.RestaurantID))
+            {
+                return NotFound(new { message = "Table not found for the specified restaurant" });
+            }
+
+            // Create the waitlist entity from the DTO
+            var waitlist = new Waitlist
+            {
+                TableID = waitlistDTO.TableID,
+                RestaurantID = waitlistDTO.RestaurantID,
+                UserID = waitlistDTO.UserID
+            };
+
+            // Add and save the waitlist entry
             _context.Waitlists.Add(waitlist);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetWaitlist", new { id = waitlist.WaitlistID }, waitlist);
+            // Return the created waitlist entry
+            return CreatedAtAction(nameof(PostWaitlist), new { id = waitlist.WaitlistID }, waitlist);
         }
 
-        // DELETE: api/Waitlists/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteWaitlist(int id)
+        // GET: api/Waitlists/user/{userId}
+        [HttpGet("user/{userId}")]
+        public async Task<ActionResult<IEnumerable<Waitlist>>> GetWaitlistsByUserId(string userId)
         {
-            var waitlist = await _context.Waitlists.FindAsync(id);
-            if (waitlist == null)
+            var waitlists = await _context.Waitlists
+                                          .Where(w => w.UserID == userId)
+                                          .ToListAsync();
+
+            if (waitlists == null || !waitlists.Any())
             {
-                return NotFound();
+                return NotFound(new { message = "No waitlists found for the specified user" });
             }
 
-            _context.Waitlists.Remove(waitlist);
+            return Ok(waitlists);
+        }
+
+        // DELETE: api/Waitlists/user/{userId}
+        [HttpDelete("user/{userId}")]
+        public async Task<IActionResult> DeleteWaitlistsByUserId(string userId)
+        {
+            var waitlists = await _context.Waitlists
+                                          .Where(w => w.UserID == userId)
+                                          .ToListAsync();
+
+            if (waitlists == null || !waitlists.Any())
+            {
+                return NotFound(new { message = "No waitlists found for the specified user" });
+            }
+
+            _context.Waitlists.RemoveRange(waitlists);
             await _context.SaveChangesAsync();
 
-            return NoContent();
+            return NoContent(); // Indicates successful deletion
         }
 
         private bool WaitlistExists(int id)

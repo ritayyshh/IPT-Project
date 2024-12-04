@@ -51,13 +51,13 @@ namespace RestaurantReservation.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "125494f1-426a-4b1e-aab3-16dfd15f9e33",
+                            Id = "2d1aabb1-1133-4c1a-a025-d41487b947ea",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "5c05871e-1e51-4711-b098-b7e47e61b267",
+                            Id = "169770d1-081c-45a9-b280-b54dee20c564",
                             Name = "User",
                             NormalizedName = "USER"
                         });
@@ -486,13 +486,19 @@ namespace RestaurantReservation.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("WaitlistID"));
 
-                    b.Property<DateTime>("JoinTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("PartySize")
-                        .HasColumnType("int");
+                    b.Property<string>("AppUserId")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<int>("RestaurantID")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("RestaurantID1")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TableID")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("TableID1")
                         .HasColumnType("int");
 
                     b.Property<string>("UserID")
@@ -501,7 +507,15 @@ namespace RestaurantReservation.Migrations
 
                     b.HasKey("WaitlistID");
 
+                    b.HasIndex("AppUserId");
+
                     b.HasIndex("RestaurantID");
+
+                    b.HasIndex("RestaurantID1");
+
+                    b.HasIndex("TableID");
+
+                    b.HasIndex("TableID1");
 
                     b.HasIndex("UserID");
 
@@ -658,21 +672,35 @@ namespace RestaurantReservation.Migrations
 
             modelBuilder.Entity("RestaurantReservation.Models.Waitlist", b =>
                 {
-                    b.HasOne("RestaurantReservation.Models.Restaurant", "Restaurant")
+                    b.HasOne("RestaurantReservation.Models.AppUser", null)
                         .WithMany("Waitlists")
+                        .HasForeignKey("AppUserId");
+
+                    b.HasOne("RestaurantReservation.Models.Restaurant", null)
+                        .WithMany()
                         .HasForeignKey("RestaurantID")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("RestaurantReservation.Models.AppUser", "User")
+                    b.HasOne("RestaurantReservation.Models.Restaurant", null)
                         .WithMany("Waitlists")
-                        .HasForeignKey("UserID")
+                        .HasForeignKey("RestaurantID1");
+
+                    b.HasOne("RestaurantReservation.Models.Table", null)
+                        .WithMany()
+                        .HasForeignKey("TableID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Restaurant");
+                    b.HasOne("RestaurantReservation.Models.Table", null)
+                        .WithMany("Waitlist")
+                        .HasForeignKey("TableID1");
 
-                    b.Navigation("User");
+                    b.HasOne("RestaurantReservation.Models.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserID")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("RestaurantReservation.Models.AppUser", b =>
@@ -712,6 +740,8 @@ namespace RestaurantReservation.Migrations
             modelBuilder.Entity("RestaurantReservation.Models.Table", b =>
                 {
                     b.Navigation("TableReservations");
+
+                    b.Navigation("Waitlist");
                 });
 #pragma warning restore 612, 618
         }
