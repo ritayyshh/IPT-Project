@@ -4,6 +4,7 @@ using RestaurantReservation.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using RestaurantReservation.Data;
 
 namespace RestaurantReservation.Controllers
 {
@@ -14,11 +15,13 @@ namespace RestaurantReservation.Controllers
         private readonly UserManager<AppUser> _userManager;
         private readonly ITokenService _tokenService;
         private readonly SignInManager<AppUser> _signInManager;
-        public AccountController(UserManager<AppUser> userManager, ITokenService tokenService, SignInManager<AppUser> signInManager)
+        private readonly AppDBContext _context;
+        public AccountController(UserManager<AppUser> userManager, ITokenService tokenService, SignInManager<AppUser> signInManager, AppDBContext context)
         {
             _userManager = userManager;
             _tokenService = tokenService;
             _signInManager = signInManager;
+            _context = context;
         }
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterDTO registerDTO)
@@ -142,7 +145,6 @@ namespace RestaurantReservation.Controllers
                 return StatusCode(500, ex.Message);
             }
         }
-
         [HttpDelete("deleteUser/{userId}")]
         public async Task<IActionResult> DeleteUser(string userId)
         {
@@ -151,23 +153,66 @@ namespace RestaurantReservation.Controllers
                 if (string.IsNullOrEmpty(userId))
                     return BadRequest("User ID cannot be empty");
 
-                // Find user by userId
+                // Find the user
                 var user = await _userManager.Users.FirstOrDefaultAsync(x => x.Id == userId);
-
                 if (user == null)
                     return NotFound("User not found");
 
+                // Fetch all orders for the user
+                var userOrders = await _context.Orders
+                    .Where(order => order.UserID == userId)
+                    .ToListAsync();
+
+                if (userOrders.Any())
+                {
+                    // Fetch TableIDs from Orders
+                    var tableIds = userOrders
+                        .Select(order => order.TableID)
+                        .Distinct()
+                        .ToList();
+
+                    if (tableIds.Any())
+                    {
+                        // Fetch and update table availability
+                        var tables = await _context.Tables
+                            .Where(table => tableIds.Contains(table.TableID))
+                            .ToListAsync();
+
+                        foreach (var table in tables)
+                        {
+                            table.IsAvailable = true; // Set the table's availability to true
+                        }
+
+                        await _context.SaveChangesAsync(); // Save changes to the database
+                    }
+
+                    // Fetch and delete OrderItems
+                    var orderIds = userOrders.Select(o => o.OrderID).ToList();
+                    var orderItems = await _context.OrderItems
+                        .Where(item => orderIds.Contains(item.OrderID))
+                        .ToListAsync();
+
+                    if (orderItems.Any())
+                    {
+                        _context.OrderItems.RemoveRange(orderItems);
+                        await _context.SaveChangesAsync(); // Save after removing order items
+                    }
+
+                    // Delete Orders
+                    _context.Orders.RemoveRange(userOrders);
+                    await _context.SaveChangesAsync(); // Save after removing orders
+                }
+
                 // Delete the user
                 var result = await _userManager.DeleteAsync(user);
-
                 if (!result.Succeeded)
                     return StatusCode(500, result.Errors);
 
-                return Ok($"User with ID {userId} deleted successfully.");
+                return Ok($"User with ID {userId}, their orders, order items, and table reservations updated/deleted successfully.");
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { error = ex.Message, details = ex.InnerException?.Message });
             }
         }
         [HttpPost("changePasswordByUserId")]

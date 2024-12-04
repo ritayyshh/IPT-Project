@@ -51,6 +51,19 @@ const ViewUserProfile = ({ handleLogout }) => {
     }
   };
 
+  // Handle account deletion
+  const handleDeleteAccount = async () => {
+    if (window.confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
+      try {
+        await axios.delete(`http://localhost:5236/api/account/deleteUser/${userId}`);
+        alert('Account deleted successfully');
+        navigate('/login'); // Redirect to LoginPage
+      } catch (error) {
+        alert('Error deleting account');
+      }
+    }
+  };
+
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -86,6 +99,7 @@ const ViewUserProfile = ({ handleLogout }) => {
             <p style={styles.cardText}><strong>Username:</strong> {userDetails.username}</p>
             <p style={styles.cardText}><strong>Email:</strong> {userDetails.email}</p>
             <button onClick={() => setIsModalOpen(true)} style={styles.changePasswordButton}>Change Password</button>
+            <button onClick={handleDeleteAccount} style={styles.deleteAccountButton}>Delete Account</button>
           </div>
         )}
       </div>
@@ -158,6 +172,16 @@ const styles = {
     textDecoration: 'none',
     fontWeight: 'bold',
     fontSize: '16px',
+  },
+  deleteAccountButton: {
+    backgroundColor: '#ff4d4d',
+    border: 'none',
+    color: 'white',
+    padding: '10px 20px',
+    borderRadius: '5px',
+    cursor: 'pointer',
+    fontSize: '16px',
+    marginTop: '10px',
   },
   logoutButton: {
     backgroundColor: '#ff4d4d',
