@@ -24,8 +24,8 @@ const ViewRestaurantTables = ({ handleLogout }) => {
   const [userId, setUserId] = useState(null);
   const [username, setUsername] = useState(null);
   const [reservationID, setReservationID] = useState(null);
+  const [waitlistData, setWaitlistData] = useState([]);
   // const [restaurantName, setRestaurantName] = useState(null);
-  
   
   const fetchTables = useCallback(async () => {
     try {
@@ -76,12 +76,27 @@ const ViewRestaurantTables = ({ handleLogout }) => {
       const response = await fetch(`http://localhost:5236/api/Restaurants/${restaurantID}`);
       const data = await response.json();
       setRestaurantData(data);
-      console.log(data.name);
+      // console.log(data.name);
     } catch (err) {
       console.error("Error fetching restaurant details:", err);
       setError("Failed to fetch restaurant details.");
     }
   }, [restaurantID]);
+
+  const fetchWaitlistData = useCallback(async () => {
+    try {
+        console.log(userId);
+        const response = await fetch(`http://localhost:5236/api/Waitlists/user/${userId}`);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        console.log(data);
+        setWaitlistData(data);
+    } catch (error) {
+        console.error("Error fetching waitlist data:", error);
+    }
+}, [userId]);
 
   useEffect(() => {
     const urlParams = new URLSearchParams(location.search);
@@ -92,14 +107,54 @@ const ViewRestaurantTables = ({ handleLogout }) => {
 
     fetchTables();
     fetchRestaurantDetails();
-  }, [location.search, fetchTables, fetchRestaurantDetails]);
+    fetchWaitlistData();
+    
+  }, [location.search, fetchTables, fetchRestaurantDetails, fetchWaitlistData]);
+
+  const checkWaitlistStatus = (tableId) => {
+    return waitlistData.some(
+      (entry) =>
+          entry.userID === userId &&
+          entry.tableID === tableId &&
+          entry.restaurantID === restaurantID
+    );
+  };
+
+  const handleJoinWaitList = async (table) => {
+    try {
+        const requestBody = {
+            tableID: table.tableID,
+            restaurantID: restaurantID,
+            userID: userId,
+        };
+
+        const response = await fetch("http://localhost:5236/api/Waitlists", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(requestBody),
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const result = await response.json();
+        console.log("Successfully joined the waitlist:", result);
+        // Optionally update the waitlist data state here to reflect the new entry
+        setWaitlistData((prev) => [...prev, result]); // Assuming `setWaitlistData` is available
+    } catch (error) {
+        console.error("Error joining waitlist:", error);
+    }
+  };
 
   const fetchTableReservationDetails = async (tableID) => {
     try {
       const response = await fetch(`http://localhost:5236/api/Tables/${tableID}`);
       const tableData = await response.json();
       const lastReservation = tableData.tableReservations[tableData.tableReservations.length - 1];
-      console.log(lastReservation.reservationID);
+      // console.log(lastReservation.reservationID);
       setReservationID(lastReservation.reservationID);
     } catch (err) {
       console.error("Error fetching table reservation details:", err);
@@ -480,17 +535,15 @@ const ViewRestaurantTables = ({ handleLogout }) => {
                 >
                   Reserve
                 </button>
-              ) : (
-                {checkWaitlistStatus(table.tableID) ? (
+              ) : checkWaitlistStatus(table.tableID) ? (
                   <p>Already Joined</p>
-                ) : (
+              ) : (
                   <button
-                      style={styles.JoinWaitListButton}
-                      onClick={() => handleJoinWaitList(table)}
+                    style={styles.JoinWaitListButton}
+                    onClick={() => handleJoinWaitList(table)}
                   >
-                      Join Wait List
+                    Join Wait List
                   </button>
-                )}
               )}
             </div>
           ))
