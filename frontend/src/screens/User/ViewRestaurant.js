@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 
 const ViewRestaurant = ({ handleLogout }) => {
-  const { restaurantID } = useParams();
+  const { restaurantID, userId } = useParams();
+  // const { restaurantID } = useParams();
   const [restaurant, setRestaurant] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -16,7 +17,7 @@ const ViewRestaurant = ({ handleLogout }) => {
   const navigate = useNavigate();
   const location = useLocation(); // To access the URL and query parameters
 
-  const [userId, setUserId] = useState(null);
+  // const [userId, setUserId] = useState(null);
   const [username, setUsername] = useState(null);
 
   // States for review form
@@ -26,9 +27,9 @@ const ViewRestaurant = ({ handleLogout }) => {
 
   useEffect(() => {
     const urlParams = new URLSearchParams(location.search);
-    const userIdFromUrl = urlParams.get("userId");
+    // const userIdFromUrl = urlParams.get("userId");
     const usernameFromUrl = urlParams.get("username");
-    if (userIdFromUrl) setUserId(userIdFromUrl);
+    // if (userIdFromUrl) setUserId(userIdFromUrl);
     if (usernameFromUrl) setUsername(usernameFromUrl);
 
     const fetchRestaurant = async () => {
@@ -439,7 +440,7 @@ const ViewRestaurant = ({ handleLogout }) => {
         <h1 style={styles.header}>{restaurant.name}</h1>
         <button
           style={styles.reserveButton}
-          onClick={() => navigate(`/ViewRestaurantTables/${restaurantID}?username=${username}&userId=${userId}`)}
+          onClick={() => navigate(`/ViewRestaurantTables/${restaurantID}/${userId}?username=${username}`)}
         >
           I want to Reserve
         </button>

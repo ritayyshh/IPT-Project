@@ -41,9 +41,9 @@ function App() {
           {/* User Pages */}
           <Route path="/user-home" element={ token && !isAdmin ? ( <UserHomePage handleLogout={handleLogout} username={username} />
                                                                  ) : ( <Navigate to="/login" replace /> )} />
-          <Route path="/restaurants/:restaurantID" element={ token && !isAdmin ? ( <ViewRestaurant handleLogout={handleLogout} />
+          <Route path="/restaurants/:restaurantID/:userId" element={ token && !isAdmin ? ( <ViewRestaurant handleLogout={handleLogout} />
                                                                                  ) : ( <Navigate to="/login" replace /> )} />
-          <Route path="/ViewRestaurantTables/:restaurantID" element={ token && !isAdmin ? ( <ViewRestaurantTables handleLogout={handleLogout} />
+          <Route path="/ViewRestaurantTables/:restaurantID/:userId" element={ token && !isAdmin ? ( <ViewRestaurantTables handleLogout={handleLogout} />
                                                                                           ) : ( <Navigate to="/login" replace /> )} />
           <Route path="/reservations/:userId" element={ token && !isAdmin ? ( <ViewReservation handleLogout={handleLogout} />
                                                                             ) : ( <Navigate to="/login" replace /> )} />

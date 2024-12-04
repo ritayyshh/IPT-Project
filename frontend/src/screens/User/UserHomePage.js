@@ -193,7 +193,7 @@ const UserHomePage = ({ handleLogout, username }) => {
 
   const handleViewRestaurant = (id) => {
     if (userId) {
-      navigate(`/restaurants/${id}?userId=${userId}&username=${username}`);
+      navigate(`/restaurants/${id}/${userId}?username=${username}`);
     } else {
       console.error("User ID not found");
     }

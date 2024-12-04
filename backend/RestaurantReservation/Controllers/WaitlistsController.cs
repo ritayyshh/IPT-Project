@@ -25,8 +25,8 @@ namespace RestaurantReservation.Controllers
                 .Where(w => w.UserID == userId)
                 .ToListAsync();
 
-            if (waitLists == null || !waitLists.Any())
-                return NotFound(new { Message = "No waitlists found for the given user ID." });
+            // if (waitLists == null || !waitLists.Any())
+            //     return NotFound(new { Message = "No waitlists found for the given user ID." });
 
             return Ok(waitLists);
         }
@@ -38,8 +38,8 @@ namespace RestaurantReservation.Controllers
             var waitList = await _context.WaitLists
                 .FirstOrDefaultAsync(w => w.WaitListID == id);
 
-            if (waitList == null)
-                return NotFound(new { Message = "Waitlist not found with the given ID." });
+            // if (waitList == null)
+            //     return NotFound(new { Message = "Waitlist not found with the given ID." });
 
             return Ok(waitList);
         }
@@ -70,8 +70,8 @@ namespace RestaurantReservation.Controllers
         {
             var waitLists = await _context.WaitLists.ToListAsync();
 
-            if (waitLists == null || !waitLists.Any())
-                return NotFound(new { Message = "No waitlists found." });
+            // if (waitLists == null || !waitLists.Any())
+            //     return NotFound(new { Message = "No waitlists found." });
 
             return Ok(waitLists);
         }
@@ -83,8 +83,8 @@ namespace RestaurantReservation.Controllers
                 .Where(w => w.TableID == tableId)
                 .ToListAsync();
 
-            if (waitLists == null || !waitLists.Any())
-                return NotFound(new { Message = "No waitlists found for the given table ID." });
+            // if (waitLists == null || !waitLists.Any())
+            //     return NotFound(new { Message = "No waitlists found for the given table ID." });
 
             return Ok(waitLists);
         }

@@ -30,6 +30,7 @@ namespace RestaurantReservation.Controllers
                     TableReservationID = tr.TableReservationID,
                     TableID = tr.TableID,
                     RestaurantID = tr.RestaurantID,
+                    RestaurantName = tr.RestaurantName,
                     Username = tr.Username,
                     ReservationDate = tr.ReservationDate,
                     StartTime = tr.StartTime,
