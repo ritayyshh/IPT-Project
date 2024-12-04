@@ -150,7 +150,7 @@ namespace RestaurantReservation.Controllers
                     TableID = t.TableID,
                     SeatingCapacity = t.SeatingCapacity,
                     IsAvailable = t.IsAvailable,
-                    Waitlist = t.Waitlist // Include the original Waitlist collection directly
+                   // Waitlist = t.Waitlist // Include the original Waitlist collection directly
                 })
                 .ToListAsync();
 

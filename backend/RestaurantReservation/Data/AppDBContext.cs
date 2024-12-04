@@ -18,7 +18,7 @@ namespace RestaurantReservation.Data
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderItem> OrderItems { get; set; }
         public DbSet<Review> Reviews { get; set; }
-        public DbSet<Waitlist> Waitlists { get; set; }
+        public DbSet<WaitList> WaitLists { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -102,25 +102,30 @@ namespace RestaurantReservation.Data
                 .HasForeignKey(tr => tr.TableID);
 
             // Configuring the foreign key relationship between Waitlist and Table
-            modelBuilder.Entity<Waitlist>()
-                .HasOne<Table>() // No navigation property, just specify the related entity
-                .WithMany() // No navigation property on Table for Waitlist
-                .HasForeignKey(w => w.TableID) // The foreign key in Waitlist
-                .OnDelete(DeleteBehavior.Cascade); // Cascade delete for this relationship
+            modelBuilder.Entity<WaitList>()
+               .HasOne<Table>() // No navigation property, just specify the related entity
+               .WithMany() // No navigation property on Table for Waitlist
+               .HasForeignKey(w => w.TableID) // The foreign key in Waitlist
+               .OnDelete(DeleteBehavior.Cascade); // Cascade delete for this relationship
 
             // Configuring the foreign key relationship between Waitlist and Restaurant
-            modelBuilder.Entity<Waitlist>()
-                .HasOne<Restaurant>() // No navigation property, just specify the related entity
-                .WithMany() // No navigation property on Restaurant for Waitlist
-                .HasForeignKey(w => w.RestaurantID) // The foreign key in Waitlist
-                .OnDelete(DeleteBehavior.Restrict); // Prevent cascade delete for this relationship
+            modelBuilder.Entity<WaitList>()
+               .HasOne<Restaurant>() // No navigation property, just specify the related entity
+               .WithMany() // No navigation property on Restaurant for Waitlist
+               .HasForeignKey(w => w.RestaurantID) // The foreign key in Waitlist
+               .OnDelete(DeleteBehavior.Restrict); // Prevent cascade delete for this relationship
 
             // Configuring the foreign key relationship between Waitlist and User
-            modelBuilder.Entity<Waitlist>()
-                .HasOne<AppUser>() // Assuming ApplicationUser as the User model
-                .WithMany() // No navigation property on ApplicationUser for Waitlist
-                .HasForeignKey(w => w.UserID) // The foreign key in Waitlist
-                .OnDelete(DeleteBehavior.Restrict); // Prevent cascade delete for this relationship
+            modelBuilder.Entity<WaitList>()
+               .HasOne<AppUser>() // Assuming ApplicationUser as the User model
+               .WithMany() // No navigation property on ApplicationUser for Waitlist
+               .HasForeignKey(w => w.UserID) // The foreign key in Waitlist
+               .OnDelete(DeleteBehavior.Restrict); // Prevent cascade delete for this relationship
+
+            modelBuilder.Entity<WaitList>()
+                .Property(w => w.WaitListID)
+                .ValueGeneratedOnAdd();
+
 
             // Fluent API for Additional Constraints
             modelBuilder.Entity<Restaurant>()

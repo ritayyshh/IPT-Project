@@ -12,7 +12,7 @@ using RestaurantReservation.Data;
 namespace RestaurantReservation.Migrations
 {
     [DbContext(typeof(AppDBContext))]
-    [Migration("20241204091520_Init")]
+    [Migration("20241204161909_Init")]
     partial class Init
     {
         /// <inheritdoc />
@@ -54,13 +54,13 @@ namespace RestaurantReservation.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "2d1aabb1-1133-4c1a-a025-d41487b947ea",
+                            Id = "488c2e8c-4e33-47c2-ad7e-ba060e5d9fc6",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "169770d1-081c-45a9-b280-b54dee20c564",
+                            Id = "6b5ac390-4645-4558-a577-b9c2beac649e",
                             Name = "User",
                             NormalizedName = "USER"
                         });
@@ -481,48 +481,33 @@ namespace RestaurantReservation.Migrations
                     b.ToTable("TableReservations");
                 });
 
-            modelBuilder.Entity("RestaurantReservation.Models.Waitlist", b =>
+            modelBuilder.Entity("RestaurantReservation.Models.WaitList", b =>
                 {
-                    b.Property<int>("WaitlistID")
+                    b.Property<int>("WaitListID")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("WaitlistID"));
-
-                    b.Property<string>("AppUserId")
-                        .HasColumnType("nvarchar(450)");
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("WaitListID"));
 
                     b.Property<int>("RestaurantID")
                         .HasColumnType("int");
 
-                    b.Property<int?>("RestaurantID1")
-                        .HasColumnType("int");
-
                     b.Property<int>("TableID")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("TableID1")
                         .HasColumnType("int");
 
                     b.Property<string>("UserID")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
-                    b.HasKey("WaitlistID");
-
-                    b.HasIndex("AppUserId");
+                    b.HasKey("WaitListID");
 
                     b.HasIndex("RestaurantID");
 
-                    b.HasIndex("RestaurantID1");
-
                     b.HasIndex("TableID");
-
-                    b.HasIndex("TableID1");
 
                     b.HasIndex("UserID");
 
-                    b.ToTable("Waitlists");
+                    b.ToTable("WaitLists");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -673,31 +658,19 @@ namespace RestaurantReservation.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("RestaurantReservation.Models.Waitlist", b =>
+            modelBuilder.Entity("RestaurantReservation.Models.WaitList", b =>
                 {
-                    b.HasOne("RestaurantReservation.Models.AppUser", null)
-                        .WithMany("Waitlists")
-                        .HasForeignKey("AppUserId");
-
                     b.HasOne("RestaurantReservation.Models.Restaurant", null)
                         .WithMany()
                         .HasForeignKey("RestaurantID")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("RestaurantReservation.Models.Restaurant", null)
-                        .WithMany("Waitlists")
-                        .HasForeignKey("RestaurantID1");
-
                     b.HasOne("RestaurantReservation.Models.Table", null)
                         .WithMany()
                         .HasForeignKey("TableID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("RestaurantReservation.Models.Table", null)
-                        .WithMany("Waitlist")
-                        .HasForeignKey("TableID1");
 
                     b.HasOne("RestaurantReservation.Models.AppUser", null)
                         .WithMany()
@@ -713,8 +686,6 @@ namespace RestaurantReservation.Migrations
                     b.Navigation("Reviews");
 
                     b.Navigation("TableReservations");
-
-                    b.Navigation("Waitlists");
                 });
 
             modelBuilder.Entity("RestaurantReservation.Models.MenuItem", b =>
@@ -736,15 +707,11 @@ namespace RestaurantReservation.Migrations
                     b.Navigation("Reviews");
 
                     b.Navigation("Tables");
-
-                    b.Navigation("Waitlists");
                 });
 
             modelBuilder.Entity("RestaurantReservation.Models.Table", b =>
                 {
                     b.Navigation("TableReservations");
-
-                    b.Navigation("Waitlist");
                 });
 #pragma warning restore 612, 618
         }

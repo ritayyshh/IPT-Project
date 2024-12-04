@@ -1,10 +1,12 @@
-﻿namespace RestaurantReservation.Models
+using System.ComponentModel.DataAnnotations;
+
+namespace RestaurantReservation.Models
 {
-    public class Waitlist
+    public class WaitList
     {
-        public int WaitlistID { get; set; }
+        public int WaitListID { get; set; }
         public int RestaurantID { get; set; }
         public int TableID { get; set; }
-        public string UserID { get; set; } = string.Empty;
+        public string UserID { get; set; }
     }
 }

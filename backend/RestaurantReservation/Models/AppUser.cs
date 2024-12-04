@@ -9,6 +9,6 @@ namespace RestaurantReservation.Models
         public ICollection<TableReservation> TableReservations { get; set; }
         public ICollection<Order> Orders { get; set; }
         public ICollection<Review> Reviews { get; set; }
-        public ICollection<Waitlist> Waitlists { get; set; }
+       // public ICollection<Waitlist> Waitlists { get; set; }
     }
 }
