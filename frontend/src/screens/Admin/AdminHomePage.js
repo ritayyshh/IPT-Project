@@ -196,7 +196,7 @@ const AdminHomePage = ({ handleLogout }) => {
               <div style={styles.restaurantName}>{restaurant.name}</div>
               <div style={styles.restaurantLocation}>Location: {restaurant.location}</div>
               <div style={styles.rating}>
-                Average Rating: {restaurant.averageRating || "N/A"}
+                Average Rating: {restaurant.averageRating || "0"}
               </div>
               <button
                 onClick={() => handleViewRestaurant(restaurant.restaurantID)}
